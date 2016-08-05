@@ -181,10 +181,11 @@ def addCompanyBase():
     db = connection['Ent_Person']
     db1 = con['middle']
     db2 = connection['constructionDB']
-    db3 = con2['jianzhu']
+    db3 = con2['jianzhu3']
     
-    companyInfo = db1.companyInfo5
-    write = db1.companyInfo3
+    companyInfo = db1.companyInfo
+#    write = db1.companyInfo3
+    write = db3.companyInfo
     
     ls = []
     lsInfo = {}
@@ -194,16 +195,25 @@ def addCompanyBase():
     lsHonor = {}
     lsBidding = {}
     print 'Hello'
-    for item in db2.companyAchievement.find():
+    for item in db2.companyAchievement2.find():
         lsBidding[item['companyName']] = item['biddingDetail']
         if len(item['honors'])>0: lsHonor[item['companyName']] = item['honors']
     
-    for item in db2.courtRecord.find():
+    for item in db2.courtRecord.find({'companyName':'四川佳和建设工程有限公司'.encode('utf8')}):
         if 'companyName' not in item: continue
         cpname = item['companyName']
-        if cpname not in lsCourt: lsCourt[cpname] = []
+        if cpname not in lsCourt: lsCourt[cpname] = [item]
         else: lsCourt[cpname].append(item)
     
+#    it = {}
+#    for item in companyInfo.find({'company_name':'四川佳和建设工程有限公司'.encode('utf8')}):
+#        print item['company_name']
+#        it = item
+#    it['courtRecords'] = lsCourt[cpname] 
+#    
+#    write.update({'company_name':'四川佳和建设工程有限公司'.encode('utf8')}, item)
+#    return
+
     for item in db2.goodBehavior.find():
         if item['goodBehavior'] != []: lsGood[item['companyName']] = item['goodBehavior']
 
@@ -257,7 +267,7 @@ def addCompanyBase():
     lsAll = []
     print len(lsInfo)
     
-    
+
     for item in companyInfo.find():
         if item['companyBases'] == {}: continue
         print item['companyBases']['legalRepresentative']
@@ -275,7 +285,49 @@ def addCompanyBase():
 #    write.insert(lsAll)
     print index, companyInfo.find().count()
 
+def addCompanyCourt():
+    connection = MongoClient('192.168.3.45', 27017)
+    con2 = MongoClient('171.221.173.154', 27017)
+    con = MongoClient('localhost', 27017)
+    db = connection['Ent_Person']
+    db1 = con['middle']
+    db2 = connection['constructionDB']
+    db3 = con2['jianzhu']
+    
+    index = 0
+    companyInfo = db1.companyInfo5
+    
+#    write = con2['jianzhu3'].companyInfo
+    write = con2['jianzhu3'].companyInfo#_copy
+#    write = db1.companyInfo
+#    print db3.person5.find({'certificate.name':'注册建造师'.encode('utf8')}).count()
+#    return
+    
+    lsCourt = {}
+    for item in db2.courtRecord.find():
+        cpname = ''
+#        if 'companyName' not in item: continue
+#        cpname = item['companyName']
+        if 'companyName' in item: cpname = item['companyName'] 
+        else: cpname = item['pname']
+        if cpname not in lsCourt: lsCourt[cpname] = [item]
+        else: lsCourt[cpname].append(item)
+    print len(lsCourt)
+    count = 6057
+    pdic = {}
+    for item in companyInfo.find():
+        cp = item['company_name']
+        if cp not in lsCourt: continue
+        item['courtRecords'] = lsCourt[cp] 
+        write.update({'company_name':cp}, item)
+        index += 1
+        pid = int(1.0 * index / count * 100)
+        if pid % 10 == 0 and pid not in pdic: 
+            pdic[pid] = 1
+            print cp
+            print str(pid) + '%' 
 
+    
 def updateCompany():
     connection = MongoClient('192.168.3.45', 27017)
     con2 = MongoClient('171.221.173.154', 27017)
@@ -290,35 +342,157 @@ def updateCompany():
     write = db1.companyInfo
     
     ls = []
+    lsInfo = {}
     lsGood = {}
     lsUpdate = []
     lsCourt = {} 
     lsHonor = {}
     lsBidding = {}
-    for item in db2.companyAchievement2.find():
-        lsBidding[item['companyName']] = item['biddingDetail']
-        if len(item['honors'])>0: lsHonor[item['companyName']] = item['honors']
     index = 0
     
+    
+#    #去除名字非法
+#    for item in companyInfo.find(): 
+#        if len(item['company_name'])<4: ls.append(item['company_name'])
+#    print write.remove({'company_name': {"$in": ls}})
+#    return
+
+#    cpio = con2['jianzhu3'].companyInfo.find()
+#    for item in cpio:
+#        cp = item['company_name']
+#        if cp not in lsInfo: lsInfo[cp] = 1
+#    print cpio.count(), len(lsInfo)
+    
+#    return
+#    lsId = {}
+#    for item in con['middle'].companyInfo.find(): lsId[item['id']] = item['company_name']
+#    for item in con2['jianzhu3'].companyInfo.find():
+#        print lsId[item['id']], item['company_name']
+#        if lsId[item['id']] != item['company_name']: print item['company_name']
+#    return
+    
+    #**************************************************************************
+    #读取较详细数据
+#    for item in db2.companyAchievement2.find():
+#        cpname = item['companyName'] 
+#        tp = { 'contactPhone':'', 'fax':'', 'address':'', 'postcode':'' }
+#        lsInfo[cpname] = { 'bidding':[], 'honors':[], 'companyBases':tp }
+#        lsInfo[cpname]['bidding'] = item['biddingDetail']
+#        lsInfo[cpname]['profile'] = item['companyProfile'][0]['profile']
+#        lsInfo[cpname]['businessLicense'] = item['companyProfile'][0]['businessLicense']
+#        if len(item['honors'])>0: lsInfo[cpname]['honors'] = item['honors']
+#        for key in tp: lsInfo[cpname]['companyBases'][key] = item['companyContact'][0][key] 
+
+    #**************************************************************************  
+#    #businessLicense 与 creditCode对调
+#    for item in companyInfo.find():
+#        cpname = item["company_name"]
+#        if type(item['badbehaviors']) == type([]): item['badbehaviors'] = item['badbehaviors'][0] #修正
+#        item['companyBases']['creditCode'] = ''
+#        if 'businessLicense' in item['companyBases']:
+#            item['companyBases']['creditCode'] = item['companyBases']['businessLicense']
+#        item['companyBases']['businessLicense'] = ''
+#        item['bidding'] = []
+#        item['honors'] = []
+#        if cpname in lsInfo:
+#            for key in lsInfo[cpname]['companyBases']:  item['companyBases'][key] = lsInfo[cpname]['companyBases'][key]
+#            item['bidding'] = lsInfo[cpname]['bidding']
+#            item['honors'] = lsInfo[cpname]['honors']
+#            item['companyBases']['businessLicense'] = lsInfo[cpname]['businessLicense']
+#            item['companyBases']['profile'] = lsInfo[cpname]['profile']
+#        ls.append(item)
+#    write.insert(ls)
+    
+    #**************************************************************************
+#    for item in companyInfo.find({"company_name":{"$in":lsInfo.keys()}}):
+#        cpname = item["company_name"]
+#        for key in lsInfo[cpname]['companyBases']: 
+#            item['companyBases'][key] = lsInfo[cpname]['companyBases'][key]
+#        item['bidding'] = lsInfo[cpname]['bidding']
+#        item['honors'] = lsInfo[cpname]['honors']
+#        write.update({'company_name': cpname }, item)
+#        print cpname
+
+#填补人员表里公司信息-根据公司表里人员personId
+def addPersonCompany():
+    con2 = MongoClient('171.221.173.154', 27017)
+    con = MongoClient('localhost', 27017)
+    db1 = con['middle']
+    db3 = con2['jianzhu']
+    
+    write = db1.person
+    companyInfo = db1.companyInfo
+    person = db1.person
+    index = 0
+    
+    lsPerson = {}
     for item in companyInfo.find():
-        cp = item['company_name'].strip()
-        if len(cp)<4:
-            index += 1
-            ls.append(cp)
-            print cp
-    
-    print write.remove({'company_name': {"$in": ls}})
-#        print 
-    
+        cp = item['company_name']
+        for line in item['certificate']:
+            if line['personID'] not in lsPerson: lsPerson[line['personID']] = {cp:1} 
+            else: 
+                if cp not in lsPerson[line['personID']]: lsPerson[line['personID']][cp] = 1 
+    for p in lsPerson: 
+        if len(lsPerson[p])>2: index += 1
     print index
-    return
-    for item in companyInfo.find({"company_name":{"$in":lsBidding.keys()}}):
-        item['honors'] = lsHonor[item['company_name']] 
-        item['bidding'] = lsBidding[item['company_name']]
-#        print item['company_name']
-#        write.update({'company_name':item['company_name']},item)
     
+    index = 0
+    for item in person.find():
+        pid = item['personId']
+        if pid not in lsPerson: continue
+        ls = {}
+        flg = False
+        for cp in item['companyname']:
+            if cp.strip() == "": 
+                flg = True
+                continue
+            ls[cp] = 1
+        for cp in lsPerson[pid]:
+            if cp in ls: continue
+            flg = True
+            ls[cp] = 1
+        if flg: #需要更新
+            index += 1
+            if index % 1000 == 0: print '第',index,'条'
+            write.update({'personId':pid},{'$set':{'companyname':ls.keys()}})
+    print 'last record：',pid
+    print '共更新',index,'条记录.'
+
+#更新中标和荣誉信息
+def updateBidding():
+    connection = MongoClient('192.168.3.45', 27017)
+    con2 = MongoClient('171.221.173.154', 27017)
+    con = MongoClient('localhost', 27017)
+    db = connection['Ent_Person']
+    db1 = con['middle']
+    db2 = connection['constructionDB']
+    db3 = con2['jianzhu3']
     
+    companyInfo = db1.companyInfo
+#    write = db1.companyInfo
+    write = db3.companyInfo
+    
+#    print db1.companyInfo_0805.find({'honors':[]}).count()
+#    return 
+    index = 0
+    lsHonor = {}
+    lsBidding = {}
+    for item in db2.companyAchievement2.find():
+        lsBidding[item['companyName']] = item['biddingDetail']
+        lsHonor[item['companyName']] = item['honors']
+    
+    for item in db1.companyInfo_0805.find({"company_name":{"$in":lsBidding.keys()}}):
+        cpname = item["company_name"]
+        if cpname not in lsBidding: continue
+        if len(item['bidding']) == len(lsBidding[cpname]) and len(item['honors']) == len(lsHonor[cpname]): continue 
+        item['bidding'] = lsBidding[cpname]
+        item['honors'] = lsHonor[cpname]
+        index += 1
+        if index % 500 == 0: print '第',index,'条'
+#        write.update({'company_name': cpname }, {'$set':{'bidding':item['bidding'], 'honors':item['honors']}})
+        print cpname
+    print '共更新公司总数：',index
+ 
 def haveNum(_s):
     st = set(_s)
     num = dict([[str(i), 1] for i in range(0,10)])
@@ -333,7 +507,11 @@ if __name__ == '__main__':
 #    calcCompany()
 #    calcPerson()
 #    addCompanyBase()
-    updateCompany()
+#    updateCompany()
+#    addCompanyCourt()
+    addPersonCompany()
+#    updateBidding()
+    
 #    print haveNum('qwiqnbwui')
     
     
