@@ -216,6 +216,7 @@ class CReadData2ES(object):
 
         pass
     
+    #公司人员资质处理
     def company_certificate(self):
         connection = MongoClient('192.168.3.45', 27017)
         db = connection['Ent_Person']
@@ -279,7 +280,7 @@ class CReadData2ES(object):
         print len(ls)
         write.insert(ls.values())
                 
-        
+    #公司资质处理
     def company_process(self):
         connection = MongoClient('192.168.3.45', 27017)
         db = connection['constructionDB']

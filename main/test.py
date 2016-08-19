@@ -7,12 +7,16 @@ Created on Jul 18, 2016
 from pymongo import MongoClient
 
 if __name__ == '__main__':
-    s = set(['boys'])
-    print s
+    ls = []
+    for i in range(0,10):
+        t = []
+        t.append(i)
+        ls.append(t)
+    print ls
     
 #    tp = {'寤�:'鍦熷缓', '姘�:'姘村埄', '璺�:'鍏矾'}  #Code_F
 #    print tp
-    print ['受伤的是你']
+#    print ['受伤的是你']
     
 #    list1 = ['2', '4', '7']
 #    print ','.join(list1)

@@ -351,11 +351,17 @@ def updateCompany():
     index = 0
     
     
-#    #去除名字非法
-#    for item in companyInfo.find(): 
+    #去除名字非法
+    for item in companyInfo.find(): 
+        cp = item['company_name']
+        if len(item['company_name'])<4: print cp
+        
+        if item['company_name'].find('')>=0: print cp
+        
 #        if len(item['company_name'])<4: ls.append(item['company_name'])
+        
 #    print write.remove({'company_name': {"$in": ls}})
-#    return
+    return
 
 #    cpio = con2['jianzhu3'].companyInfo.find()
 #    for item in cpio:
@@ -420,7 +426,7 @@ def addPersonCompany():
     db1 = con['middle']
     db3 = con2['jianzhu']
     
-    write = db1.person
+    write = db1.person1
     companyInfo = db1.companyInfo
     person = db1.person
     index = 0
@@ -432,11 +438,7 @@ def addPersonCompany():
             if line['personID'] not in lsPerson: lsPerson[line['personID']] = {cp:1} 
             else: 
                 if cp not in lsPerson[line['personID']]: lsPerson[line['personID']][cp] = 1 
-    for p in lsPerson: 
-        if len(lsPerson[p])>2: index += 1
-    print index
-    
-    index = 0
+    lines = []
     for item in person.find():
         pid = item['personId']
         if pid not in lsPerson: continue
@@ -454,9 +456,14 @@ def addPersonCompany():
         if flg: #需要更新
             index += 1
             if index % 1000 == 0: print '第',index,'条'
-            write.update({'personId':pid},{'$set':{'companyname':ls.keys()}})
+            item['companyname'] = ls.keys()
+            lines.append([pid, ls.keys()])  #表更新方式
+#        lines.append(item)    #重建表方式
+
+#    write.insert(lines)    #重建表方式
+    for line in lines: write.update({'personId':line[0]},{'$set':{'companyname':line[1]}})
     print 'last record：',pid
-    print '共更新',index,'条记录.'
+    print '共更新',index,'条记录. person1'
 
 #更新中标和荣誉信息
 def updateBidding():
@@ -510,8 +517,9 @@ if __name__ == '__main__':
 #    updateCompany()
 #    addCompanyCourt()
     addPersonCompany()
-#    updateBidding()
     
+#    updateBidding()
+#    updateCompany()
 #    print haveNum('qwiqnbwui')
     
     
