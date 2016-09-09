@@ -77,144 +77,56 @@ class CReadData2ES(object):
         elif self.IS_ZaoJiaGongChengShi(_item):return 'zj'
         elif self.IS_ZaoJiaYuan(_item):return 'zjy'
     
-    #--------------------------------------------------------------------------------
-    #处理建造师过程
-    def jianzaoshi_process(self, item, lsNames, personDic):
-        ES_Dict = {'companyname':{}}
-        common = [['name', 'name'], ['location', 'location'], ['post', 'workpost']] #, ['companyName', 'companyname']
-        m = {'jz':[['certificateCode', 'jz_code'], ['validityDate', 'jz_validityDate'],['staffLevel', 'jz_staffLevel'], ['type', 'jz_type']],
-              'ak':[['certificateCode', 'ak_code'], ['validityDate', 'ak_validityDate']],
-              'zj':[['certificateCode', 'zj_code'], ['validityDate', 'zj_validityDate'],['staffLevel', 'zj_staffLevel'], ['type', 'zj_type']],
-              'zjy':[['certificateCode', 'zjy_code'], ['validityDate', 'zjy_validityDate'],['staffLevel', 'zjy_staffLevel'], ['type', 'zjy_type']]
-        }
-        tp = self._getType(item)
-        if not tp: return 1
-        for c in common: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
-        for c in m[tp]: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
-        ES_Dict['companyname'][item['companyName']] = 1
-        personId = item['personId']     #人员唯一标识
-        if item['name'] not in lsNames: lsNames[item['name']] = {'companyName':{item['companyName']:personId}, 'code':{item['certificateCode']:personId} }
-        else:
-            if item['companyName']!='':lsNames[item['name']]['companyName'][item['companyName']] = personId 
-            if item['certificateCode']!='':lsNames[item['name']]['code'][item['certificateCode']] = personId
-        if personId not in personDic:   #是否收录，同一人员
-            personDic[personId] = ES_Dict
-        else:
-            if (tp + '_code') not in personDic[personId]:
-                for e in ES_Dict: personDic[personId][e] = ES_Dict[e]
-#            return 0
-        
-    #--------------------------------------------------------------------------------
-    #通用处理过程合并
-    def common_process(self, common, item, lsNames, personDic, card, code, company):
-        ES_Dict = {'companyname':{}}
-        for c in common: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
-        ES_Dict['companyname'][item[company]] = 1
-        name = ES_Dict['name']
-        personId = 're' + item[card]
-        if name not in lsNames: 
-            lsNames[name] = {'companyName':{item[company]:personId}, 'code':{item[code]:personId} }
-            personDic[personId] = ES_Dict
-        else:   #名字出现过
-            if item[code] in lsNames[name]['code']:  #先核对证书
-                return 0
-            if item[company] in lsNames[name]['companyName']:  #后核对公司
-                personId = lsNames[name]['companyName'][item[company]]
-                for e in ES_Dict: personDic[personId][e] = ES_Dict[e]
-#                print name, item[company]
-#                print personId,personDic[personId]['name'],
-#                cout(personDic[personId]['companyname'])
-        return ES_Dict
-    
-    
-    # 把记录写入搜索引擎
-    def ReadMongoTable(self):
-#        connection = pymongo.Connection('192.168.3.45', 27017)
-        
-        connection = MongoClient('192.168.3.45', 27017)
-        db = connection['constructionDB']
-        con = MongoClient('localhost', 27017)
-        db2 = con['middle']
-        write = db2.person2
-        
-        company_table = db.EInPQualification
-        jianzaoshi_table = db.personnelInPCopy
-        jianzaoshi2_table = db.personnelEnterPCopy
-        ankaozheng_table = db.WCSafetyEngineer
-        anquangongchengshi_table = db.safetyEngineer
-        zaojiashi_table = db.CERegistered
-        
-        index = 0
-        lsAll = []
-        personDic = {}
-        lsNames = {}
-        
-        #**************************************************************************************
-        print 'deal jianzaoshi_table..'
-        # 写建设厅、建造师数据
-        for item in jianzaoshi_table.find():
-            if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-        print 'collect ', len(personDic), 'items.'
-#        return
+#    #--------------------------------------------------------------------------------
+#    #处理建造师过程
+#    def jianzaoshi_process(self, item, lsNames, personDic):
+#        ES_Dict = {'companyname':{}}
+#        common = [['name', 'name'], ['location', 'location'], ['post', 'workpost']] #, ['companyName', 'companyname']
+#        m = {'jz':[['certificateCode', 'jz_code'], ['validityDate', 'jz_validityDate'],['staffLevel', 'jz_staffLevel'], ['type', 'jz_type']],
+#              'ak':[['certificateCode', 'ak_code'], ['validityDate', 'ak_validityDate']],
+#              'zj':[['certificateCode', 'zj_code'], ['validityDate', 'zj_validityDate'],['staffLevel', 'zj_staffLevel'], ['type', 'zj_type']],
+#              'zjy':[['certificateCode', 'zjy_code'], ['validityDate', 'zjy_validityDate'],['staffLevel', 'zjy_staffLevel'], ['type', 'zjy_type']]
+#        }
+#        tp = self._getType(item)
+#        if not tp: return 1
+#        for c in common: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
+#        for c in m[tp]: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
+#        ES_Dict['companyname'][item['companyName']] = 1
+#        personId = item['personId']     #人员唯一标识
+#        if item['name'] not in lsNames: lsNames[item['name']] = {'companyName':{item['companyName']:personId}, 'code':{item['certificateCode']:personId} }
+#        else:
+#            if item['companyName']!='':lsNames[item['name']]['companyName'][item['companyName']] = personId 
+#            if item['certificateCode']!='':lsNames[item['name']]['code'][item['certificateCode']] = personId
+#        if personId not in personDic:   #是否收录，同一人员
+#            personDic[personId] = ES_Dict
+#        else:
+#            if (tp + '_code') not in personDic[personId]:
+#                for e in ES_Dict: personDic[personId][e] = ES_Dict[e]
+##            return 0
+#        
+#    #--------------------------------------------------------------------------------
+#    #通用处理过程合并
+#    def common_process(self, common, item, lsNames, personDic, card, code, company):
+#        ES_Dict = {'companyname':{}}
+#        for c in common: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
+#        ES_Dict['companyname'][item[company]] = 1
+#        name = ES_Dict['name']
+#        personId = 're' + item[card]
+#        if name not in lsNames: 
+#            lsNames[name] = {'companyName':{item[company]:personId}, 'code':{item[code]:personId} }
+#            personDic[personId] = ES_Dict
+#        else:   #名字出现过
+#            if item[code] in lsNames[name]['code']:  #先核对证书
+#                return 0
+#            if item[company] in lsNames[name]['companyName']:  #后核对公司
+#                personId = lsNames[name]['companyName'][item[company]]
+#                for e in ES_Dict: personDic[personId][e] = ES_Dict[e]
+##                print name, item[company]
+##                print personId,personDic[personId]['name'],
+##                cout(personDic[personId]['companyname'])
+#        return ES_Dict
+#    
 
-        #**************************************************************************************
-        print 'deal jianzaoshi2_table..'
-        for item in jianzaoshi2_table.find():
-            if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-        print 'collect ', len(personDic), 'items.'
-#        return
-
-        #**************************************************************************************
-        print 'deal ankaozheng_table..'
-        # 写安考证
-        common = [['engineerName', 'name'], ['engineerGender', 'gender'], ['engineerTitle', 'title'], ['idcard', 'idcard'], ['certificateCode', 'ak_code'], ['certificateStatus', 'ak_status'], ['validityDate', 'ak_validityDate'], ['companyType', 'ak_companytype']]
-        for item in ankaozheng_table.find():
-            self.common_process(common, item, lsNames, personDic, 'idcard', 'certificateCode', 'workUnits')
-        print 'collect ', len(personDic), 'items.'
-#        return
-        
-        #**************************************************************************************
-        print 'deal anquangongchengshi_table..'        
-        #写安全工程师
-        common = [['engineerName', 'name'], ['engineerGender', 'gender'], ['companyType', 'aq_companytype'], ['registeredType', 'aq_registeredtype'], ['validityDate', 'aq_validitydate'], ['engineerCode', 'aq_code']]
-        for item in anquangongchengshi_table.find():
-            self.common_process(common, item, lsNames, personDic, 'engineerCode', 'engineerCode', 'workUnits')
-        print 'collect ', len(personDic), 'items.'
-#        return
-    
-        #**************************************************************************************
-        print 'deal zaojiashi_table..'
-        #写造价工程师
-        common = [['engineerName', 'name'], ['engineerGender', 'gender'], ['branchCompany', 'branchcompany'], ['registeredAgencies', 'zj_registeredagencies'], ['status', 'zj_code'], ['registeredNumb', 'zj_code']]
-        for item in zaojiashi_table.find():
-            self.common_process(common, item, lsNames, personDic, 'registeredNumb', 'registeredNumb', 'registeredCompany')
-        print 'collect ', len(personDic), 'items.'
-#        return
-        
-        for p in personDic:
-            personDic[p]['companyname'] = personDic[p]['companyname'].keys() 
-        write.insert(personDic.values())
-        return
-        
-        #写公司资质
-        common = [['qualificationType', 'company_qualificationType'], ['professionalType', 'company_professionalType'], ['professionalLevel', 'company_professionalLevel']]
-        for item in  company_table.find():
-            ES_Dict = {}
-            for c in common: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
-        
-        return
-    
-        #写公司（这里会出现重名BUG，但不管啦）
-#        res = self.es.index(index="jh-index", doc_type='jh-type',id=(ES_Dict["companyname"] + "#" + ES_Dict["name"]), body=ES_Dict)
-
-    #搜索
-        #搜索公司DICT拼写
-        #搜索公司DICT组合
-        #搜索人员DICT拼写
-        #搜索人员DICT组合
-        #搜索
-
-        pass
     
     #公司人员资质处理
     def company_certificate(self):
@@ -248,8 +160,8 @@ class CReadData2ES(object):
             else:
                 if 'certificate' not in ls[item['company_name']]: ls[item['company_name']]['certificate'] = []
                 if 'companyBases' not in ls[item['company_name']]: ls[item['company_name']]['companyBases'] = {}
-        print len(ls), index
-        
+        print len(ls), len(companyDic), index
+        return
         index = 10000000
         for cpname in companyDic:
             if 'company_id' not in companyDic[cpname]:
@@ -278,7 +190,7 @@ class CReadData2ES(object):
             index += 1
        
         print len(ls)
-        write.insert(ls.values())
+#        write.insert(ls.values())
                 
     #公司资质处理
     def company_process(self):
@@ -320,47 +232,47 @@ class CReadData2ES(object):
             companyDic[l]['qualificationType'] = ls 
         write.insert(companyDic.values())
 
-    def person_deal(self):
-        con = MongoClient('localhost', 27017)
-        db = con['middle']
-        person = db.person
-        write = db.person3
-        head = ['jz_', 'zj_', 'zjy_', 'ak_', 'aq_']
-        common = ['_id', 'idcard', 'companyname', 'location', 'name', 'workpost', 'branchcompany', 'title', 'gender']
-        head_dic = {}
-        for h in head: head_dic[h] = 1
-        lines = []
-        for item in person.find():    
-            line = {}
-            for v in common:
-                if v in item: line[v] = item[v]
-                else: line[v] = ''
-            line['certificate'] = {}
-            for v in item:
-                if v not in common: 
-                    sp = v.split('_')
-                    cls = sp[0] + '_'
-                    if cls not in head_dic: continue
-                    if sp[1] == "Code": sp[1] = "code"
-                    if cls not in line['certificate']: line['certificate'][cls] = {sp[1] : item[v]}
-                    else: line['certificate'][cls][sp[1]] = item[v]
-                    if sp[1] == 'validityDate' or sp[1] == 'validitydate': line['certificate'][cls]['validityDate'] = Date_F(item[v])
-            lines.append(line)
-        for l in lines:
-            l['certificate'] = l['certificate'].values()
+#    def person_deal(self):
+#        con = MongoClient('localhost', 27017)
+#        db = con['middle']
+#        person = db.person
+#        write = db.person3
+#        head = ['jz_', 'zj_', 'zjy_', 'ak_', 'aq_']
+#        common = ['_id', 'idcard', 'companyname', 'location', 'name', 'workpost', 'branchcompany', 'title', 'gender']
+#        head_dic = {}
+#        for h in head: head_dic[h] = 1
+#        lines = []
+#        for item in person.find():    
+#            line = {}
+#            for v in common:
+#                if v in item: line[v] = item[v]
+#                else: line[v] = ''
+#            line['certificate'] = {}
+#            for v in item:
+#                if v not in common: 
+#                    sp = v.split('_')
+#                    cls = sp[0] + '_'
+#                    if cls not in head_dic: continue
+#                    if sp[1] == "Code": sp[1] = "code"
+#                    if cls not in line['certificate']: line['certificate'][cls] = {sp[1] : item[v]}
+#                    else: line['certificate'][cls][sp[1]] = item[v]
+#                    if sp[1] == 'validityDate' or sp[1] == 'validitydate': line['certificate'][cls]['validityDate'] = Date_F(item[v])
+#            lines.append(line)
+#        for l in lines:
+#            l['certificate'] = l['certificate'].values()
+##            print l
+#
+#        write.insert(lines)
+#        return
+#        
+#        ldic = {}
+#        for item in person.find():    
+#            for v in item:
+#                if v not in ldic: ldic[v] = 1
+#                
+#        for l in ldic:
 #            print l
-
-        write.insert(lines)
-        return
-        
-        ldic = {}
-        for item in person.find():    
-            for v in item:
-                if v not in ldic: ldic[v] = 1
-                
-        for l in ldic:
-            print l
-#        write.insert()
+##        write.insert()
 
 def Date_F(str):
     str = str.decode('gb18030')
@@ -368,6 +280,7 @@ def Date_F(str):
     if not (str.find("年")>0 and str.find("月")>0): return str
     sp = re.split("年|月".decode('gb18030'), str)
     return sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')
+
 
 print 'Hello Moto..'
 dt = datetime.datetime.now()

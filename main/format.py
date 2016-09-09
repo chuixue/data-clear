@@ -328,40 +328,39 @@ def addCompanyCourt():
             print str(pid) + '%' 
 
     
-def updateCompany():
-    connection = MongoClient('192.168.3.45', 27017)
-    con2 = MongoClient('171.221.173.154', 27017)
-    con = MongoClient('localhost', 27017)
-    db = connection['Ent_Person']
-    db1 = con['middle']
-    db2 = connection['constructionDB']
-    db3 = con2['jianzhu']
-    
-    companyInfo = db1.companyInfo5
-#    write = con2['jianzhu3'].companyInfo
-    write = db1.companyInfo
-    
-    ls = []
-    lsInfo = {}
-    lsGood = {}
-    lsUpdate = []
-    lsCourt = {} 
-    lsHonor = {}
-    lsBidding = {}
-    index = 0
-    
-    
-    #去除名字非法
-    for item in companyInfo.find(): 
-        cp = item['company_name']
-        if len(item['company_name'])<4: print cp
-        
-        if item['company_name'].find('')>=0: print cp
-        
-#        if len(item['company_name'])<4: ls.append(item['company_name'])
-        
-#    print write.remove({'company_name': {"$in": ls}})
-    return
+#def updateCompany():
+#    connection = MongoClient('192.168.3.45', 27017)
+#    con2 = MongoClient('171.221.173.154', 27017)
+#    con = MongoClient('localhost', 27017)
+#    db = connection['Ent_Person']
+#    db1 = con['middle']
+#    db2 = connection['constructionDB']
+#    db3 = con2['jianzhu']
+#    
+#    companyInfo = db1.companyInfo5
+##    write = con2['jianzhu3'].companyInfo
+#    write = db1.companyInfo
+#    
+#    ls = []
+#    lsInfo = {}
+#    lsGood = {}
+#    lsUpdate = []
+#    lsCourt = {} 
+#    lsHonor = {}
+#    lsBidding = {}
+#    index = 0
+#    
+#    #去除名字非法
+#    for item in companyInfo.find(): 
+#        cp = item['company_name']
+#        if len(item['company_name'])<4: print cp
+#        
+#        if item['company_name'].find('')>=0: print cp
+#        
+##        if len(item['company_name'])<4: ls.append(item['company_name'])
+#        
+##    print write.remove({'company_name': {"$in": ls}})
+#    return
 
 #    cpio = con2['jianzhu3'].companyInfo.find()
 #    for item in cpio:
@@ -420,50 +419,50 @@ def updateCompany():
 #        print cpname
 
 #填补人员表里公司信息-根据公司表里人员personId
-def addPersonCompany():
-    con2 = MongoClient('171.221.173.154', 27017)
-    con = MongoClient('localhost', 27017)
-    db1 = con['middle']
-    db3 = con2['jianzhu']
-    
-    write = db1.person1
-    companyInfo = db1.companyInfo
-    person = db1.person
-    index = 0
-    
-    lsPerson = {}
-    for item in companyInfo.find():
-        cp = item['company_name']
-        for line in item['certificate']:
-            if line['personID'] not in lsPerson: lsPerson[line['personID']] = {cp:1} 
-            else: 
-                if cp not in lsPerson[line['personID']]: lsPerson[line['personID']][cp] = 1 
-    lines = []
-    for item in person.find():
-        pid = item['personId']
-        if pid not in lsPerson: continue
-        ls = {}
-        flg = False
-        for cp in item['companyname']:
-            if cp.strip() == "": 
-                flg = True
-                continue
-            ls[cp] = 1
-        for cp in lsPerson[pid]:
-            if cp in ls: continue
-            flg = True
-            ls[cp] = 1
-        if flg: #需要更新
-            index += 1
-            if index % 1000 == 0: print '第',index,'条'
-            item['companyname'] = ls.keys()
-            lines.append([pid, ls.keys()])  #表更新方式
-#        lines.append(item)    #重建表方式
-
-#    write.insert(lines)    #重建表方式
-    for line in lines: write.update({'personId':line[0]},{'$set':{'companyname':line[1]}})
-    print 'last record：',pid
-    print '共更新',index,'条记录. person1'
+#def addPersonCompany():
+#    con2 = MongoClient('171.221.173.154', 27017)
+#    con = MongoClient('localhost', 27017)
+#    db1 = con['middle']
+#    db3 = con2['jianzhu']
+#    
+#    write = db1.person1
+#    companyInfo = db1.companyInfo
+#    person = db1.person
+#    index = 0
+#    
+#    lsPerson = {}
+#    for item in companyInfo.find():
+#        cp = item['company_name']
+#        for line in item['certificate']:
+#            if line['personID'] not in lsPerson: lsPerson[line['personID']] = {cp:1} 
+#            else: 
+#                if cp not in lsPerson[line['personID']]: lsPerson[line['personID']][cp] = 1 
+#    lines = []
+#    for item in person.find():
+#        pid = item['personId']
+#        if pid not in lsPerson: continue
+#        ls = {}
+#        flg = False
+#        for cp in item['companyname']:
+#            if cp.strip() == "": 
+#                flg = True
+#                continue
+#            ls[cp] = 1
+#        for cp in lsPerson[pid]:
+#            if cp in ls: continue
+#            flg = True
+#            ls[cp] = 1
+#        if flg: #需要更新
+#            index += 1
+#            if index % 1000 == 0: print '第',index,'条'
+#            item['companyname'] = ls.keys()
+#            lines.append([pid, ls.keys()])  #表更新方式
+##        lines.append(item)    #重建表方式
+#
+##    write.insert(lines)    #重建表方式
+#    for line in lines: write.update({'personId':line[0]},{'$set':{'companyname':line[1]}})
+#    print 'last record：',pid
+#    print '共更新',index,'条记录. person1'
 
 #更新中标和荣誉信息
 def updateBidding():
@@ -516,11 +515,11 @@ if __name__ == '__main__':
 #    addCompanyBase()
 #    updateCompany()
 #    addCompanyCourt()
-    addPersonCompany()
+#    addPersonCompany()
     
 #    updateBidding()
 #    updateCompany()
 #    print haveNum('qwiqnbwui')
-    
+    pass
     
     

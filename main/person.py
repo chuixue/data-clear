@@ -1,16 +1,18 @@
 #encoding:utf8
+'''
+Created on Sep 1, 2016
+
+@author: Administrator
+'''
+
 import pymongo
-import datetime
-#from pymongo import ASCENDING, DESCENDING
 from pymongo import MongoClient
-#from elasticsearch import Elasticsearch
-import time
 import datetime
-import string
-#import jieba
+import time
 import re
+import string
 import numpy as np
-#from elasticsearch import Elasticsearch
+
 
 import sys
 #reload(sys)
@@ -57,6 +59,7 @@ class Type(object):
     def IS_ZaoJiaGongChengShi(self, item):  #造价师
         if 'personType' in item and item['personType']=='造价工程师': return True
         if "certificateCode" in item:
+            if 'staffLevel' in item and item['staffLevel'].find("造价工程师")>=0: return True
             if (item["certificateCode"].find('造') >= 0): return True; 
         else:
             if 'staffLevel' in item and 'type' in item and item['type'].find("造价工程师")>=0 and item['staffLevel'].find("造价工程师")>=0: return True
@@ -65,9 +68,7 @@ class Type(object):
     def IS_ZaoJiaYuan(self, item):  #
         if 'personType' in item and item['personType']=='造价员': return True
         if 'certificateCode' in item and 'type' in item:
-            if (item["certificateCode"].find('造') == -1 and item["type"].find("造价工程师")>=0): return True;
-        else:
-            if 'staffLevel' in item and item["type"].find("造价工程师")>=0 and item['staffLevel'].find("造价员")>=0: return True
+            if (item["certificateCode"].find('造') == -1 and item["staffLevel"].find("造价员")>=0): return True
         return False
         
     def IS_ZhuCeAnQuan(self, item):
@@ -99,14 +100,10 @@ class Type(object):
 
 class CReadData2ES(object):
 
-    def __init__(self):
-#        self.es = Elasticsearch()
-        self.Type = Type()
-        pass
+    def __init__(self): self.Type = Type()
 
     def AddItem2Dict(self,item,dict,itemkey,dictkey):
-        if item[itemkey]!="":
-            dict[dictkey] = item[itemkey];
+        if item[itemkey]!="": dict[dictkey] = item[itemkey];
         return
 
     def typeDeal(self, type, item):
@@ -118,40 +115,66 @@ class CReadData2ES(object):
                 tp = {'市政':'市政公用', '机电':'机电', '水利':'水利水电', '建筑':'建筑', '矿业':'矿业', '铁路':'铁路',
                       '公路':'公路', '港航':'港口与航道', '民航':'民航机场', '水利水电工程':'水利水电', '通信':'通信与广电'
                       ,'房屋建筑工程':'建筑', '港口':'港口与航道', '机电(限消防工程专业)':'机电'}
-                if p!='':
-                    if item['professional'] == '注册建造师': p = ''
-                    else: p = tp[p] + '工程'
+                if p!='': p = '' if item['professional'] == '注册建造师' else tp[p] + '工程' 
                 if item['staffLevel']=='建筑工程': item['staffLevel']=""    #解决部分数据错乱
-                line = ['注册建造师', p, item['staffLevel'].split('级')[0] + '级', item['certificateCode'], Date_F(item['validityDate'])]
+                lv = '' if item['staffLevel']=="" else item['staffLevel'].split('级')[0] + '级'
+                line = ['注册建造师', p, lv, item['certificateCode'], Date_F(item['validityDate'])]
                 lines.append(line)
         elif type == 'ak':
             code = item['certificateCode']
+            if code.find('施')!=-1: return []
             p = [k for k in ['水', '交', '建'] if code.find(k)>=0]
-            lv = re.split('安|\(|\（|\[|\ '.decode('utf8'), code)[1]
-            lslv = {'A':1, 'B':1, 'C':1, 'C1':1, 'C2':1}
-            if lv not in lslv: 
-                print item['certificateCode'], lv
-                
-##&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&                
-                
-                #因电建项目暂停本部分
-                
-                
-                
-##&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-            
-            line = ['安考证', p[0]+'安', lv+'级', code.encode('utf8'), Date_F(item['validityDate'])]
+            lslv = {'A':'A', 'B':'B', 'C':'C', 'C1':'C1', 'C2':'C2', u"Ａ":"A", u"Ｂ":"B", u"Ｃ":"C", "c":"C"}
+            splv = re.split('【|市|审|安|\(|（|\（|\)|）|\[| '.decode('utf8'), code)
+            lv = splv[1]
+            if lv not in lslv:
+                if '辽'==code[0:1] and lv[1:2] in lslv: lv = lv[1:2]
+                if '新'==code[0:1] and lv[0:1] in lslv: lv = lv[0:1]
+                if '藏'==code[0:1] and lv[0:1] in lslv: lv = lv[0:1]
+                if '湘'==code[0:1] and len(splv)==6 and splv[3] in lslv: lv = splv[3] 
+                if '鲁'==code[0:1] and lv[0:1] in lslv: lv = lv[0:1]
+                if '津'==code[0:1] and splv[2] in lslv: lv = splv[2]
+                if '晋'==code[0:1] and splv[2] in lslv: lv = splv[2]
+                if '渝'==code[0:1] and len(splv)==4 and splv[2] in lslv: lv = splv[2]
+                if '渝'==code[0:1] and len(splv)==2 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+                if '苏'==code[0:1] and len(splv)==4 and splv[2][0:1] in lslv: lv = splv[2][0:1]
+                if '粤'==code[0:1] and len(splv)==2 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+                if '闽'==code[0:1] and len(splv)==2 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+                if '闽'==code[0:1] and len(splv)==4 and splv[2] in lslv: lv = splv[2]
+                if '琼'==code[0:1] and len(splv)>3 and splv[2] in lslv: lv = splv[2]
+                if '赣'==code[0:1] and len(splv)==2 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+                if '冀'==code[0:1] and len(splv)==2 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+                if '冀'==code[0:1] and len(splv)==4 and splv[1][-1:] in lslv: lv = splv[1][-1:]
+                if '甘'==code[0:1] and len(splv)==4 and splv[1][-1:] in lslv: lv = splv[1][-1:]
+                if '京'==code[0:1] and len(splv)==3 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+                if '京'==code[0:1] and len(splv)==4 and splv[2] in lslv: lv = splv[2]
+                if '豫'==code[0:1] and len(splv)>3 and splv[2] in lslv: lv = splv[2]
+                if '川'==code[0:1] and len(splv)==2 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+                if '川'==code[0:1] and len(splv)==4 and splv[3][0:1] in lslv: lv = splv[3][0:1]
+                if '交'==code[0:1] and len(splv)==8 and splv[2] in lslv: lv = splv[2]
+                if '水'==code[0:1] and len(splv)==3 and splv[1][0:1] in lslv: lv = splv[1][0:1]
+            lv = "" if lv not in lslv else lslv[lv]+'级'
+            line = ['安考证', p[0]+'安', lv, code.encode('utf8'), Date_F(item['validityDate'])]
             lines.append(line)
         elif type == 'zj':
-            tp = {'建':'土建', '水':'水利', '交公':'公路'}
+            tp = {'建':'土建', '水':'水利', '交公':'公路', '水利':'水利'}
             p = re.split('\[|〔|【|［|（|\(|{|『|「'.decode('utf8'), item['certificateCode'])[0].encode('utf8')
             if p.find('建造')>=0 or p.find('建')>=0 or item['certificateCode'].find('建')>=0: p = '建'
-            if p.find('公路')>=0 or p.find('交公')>=0 or p.find('交工')>=0: p = '交公'
-            if p not in tp: p = '建'
+            if p.find('公路')>=0 or p.find('交公')>=0 or p.find('交工')>=0 or p.find('公造')>=0: p = '交公'
+            if p.find('水')>=0 or p.find('SL')>=0: p = '水'    
+            if 'professional' not in item: item['professional'] = ''
+            if item['professional'] in tp: p = item['professional'] 
+            if p not in tp: p ='建'
             line = ['造价工程师', tp[p], '', item['certificateCode'], item['validityDate']]
             lines.append(line)
         elif type == 'zjy':
-            line = ['造价员', item['professional'], '', item['certificateCode'], item['validityDate']]
+            p = item['professional'].encode('utf8')
+            lsp = {'水利':'水利', '公路':'公路', '土建':'土建'}
+            if item['certificateCode'].find('水')!=-1: p = '水利'
+            if item['certificateCode'].find('公')!=-1: p = '公路'
+            if item['certificateCode'].find('建')!=-1: p = '土建'
+            p = '土建' if p not in lsp else lsp[p]
+            line = ['造价员', p, '', item['certificateCode'], item['validityDate']]
             lines.append(line)
         elif type == 'aq':
             temp = { '其他安全':'', '危险物品安全':'', '煤矿安全':'', '非煤矿矿山安全':'', '建筑施工安全':''}
@@ -182,6 +205,7 @@ class CReadData2ES(object):
             line = ['注册结构师', '', lv, item['certificateCode'], Date_F(item['validityDate'])]
             lines.append(line)
         elif type == 'zyjs':
+            return []   
             line = [item['post'], item['professional'], '', item['certificateCode'], Date_F(item['validityDate'])]
             lines.append(line)
         return lines 
@@ -232,8 +256,7 @@ class CReadData2ES(object):
             print lsst[lst][2]
 
                
-    # 把记录写入搜索引擎
-    def ReadMongoTable(self):
+    def dealPerson(self):
         con1 = MongoClient('localhost', 27017)
         con2 = MongoClient('192.168.3.45', 27017)
         con3 = MongoClient('171.221.173.154', 27017)
@@ -241,80 +264,69 @@ class CReadData2ES(object):
         db2 = con2['constructionDB']
         db3 = con3['jianzhu3']
         
-        write = db2.person5
-        self.writer = write 
-        write1 = db2.person2
-        
-        company_table = db1.companyInfo
-#        jianzaoshi_table = db2.personnelInPCopy
-#        jianzaoshi2_table = db2.personnelEnterPCopy
-#        ankaozheng_table = db2.WCSafetyEngineer
-#        anquangongchengshi_table = db2.safetyEngineer
-#        zaojiashi_table = db2.CERegistered
-#        zhuce_table = db2.WCEngineer
+        write1 = db1.personNew
+#        self.writer = write1 
         
         index = 0
         personDic = {}
         lsNames = {}
         st =set()
         
-#        #**************************************************************************************
-#        print 'deal jianzaoshi_table..'
-#        # 写建设厅、建造师数据
-#        for item in db2.personnelInPCopy.find():
-#            if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-##            index+=1
-##            if index>3000: break
+        #**************************************************************************************
+        print 'deal jianzaoshi_table..：personnelInPCopy'
+        #含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册建造师、注册电气工程师、注册建筑师、注册公用设备工程师、注册结构师
+        for item in db2.personnelInPCopy.find():
+            if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
 #        self.calcPerson(personDic)
 #        return
-        
+
         #**************************************************************************************
-        print 'deal jianzaoshi2_table..'
+        print 'deal jianzaoshi2_table..：personnelEnterPCopy'
+        #含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册结构师、注册电气工程师、注册建筑师、注册公用设备工程师、注册建造师
         for item in db2.personnelEnterPCopy.find():
             if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-        
-        self.calcPerson(personDic)
-        return        
-        
+#        self.calcPerson(personDic)
+#        return        
+
         #**************************************************************************************
         print 'deal ankaozheng_table..'
-        # 写安考证
+        #只有安考证
         for item in db2.WCSafetyEngineer.find():
             item['name'] = item['engineerName']
             item['location'] = "四川省"
             item['personId'] = 'idcard-'+ item['idcard']
             item['companyName'] = item['workUnits']
             if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-        self.calcPerson(personDic)
+#        self.calcPerson(personDic)
 #        return
     
         #**************************************************************************************
         print 'deal anquangongchengshi_table: safetyEngineer..'        
-        #写安全工程师
+        #只有注册安全工程师
         common = [['engineerName', 'name'], ['engineerCode', 'certificateCode'], ['workUnits', 'companyName']]        
         for item in db2.safetyEngineer.find():
             for c in common: item[c[1]] = item[c[0]]
             item['location'] = "四川省" if item['companyType'] == "省内企业" else ""
             item['personId'] = 'safe-engineerCode'+ item['engineerCode']
             if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-        self.calcPerson(personDic)
+#        self.calcPerson(personDic)
 #        return
 
         #**************************************************************************************
         print 'deal zaojiashi_table: CERegistered..'        
-        #造价工程师
+        #只有造价工程师
         common = [['engineerName', 'name'], ['registeredNumb', 'certificateCode'], ['registeredCompany', 'companyName'], ['validDate', 'validityDate'], ['registeredAgencies', 'location']]
         for item in db2.CERegistered.find():
             for c in common: item[c[1]] = item[c[0]]  
             item['personId'] = 'ce-registeredNumb'+ item['registeredNumb']
             if item['certificateCode'].find('建[造]')!=0: item['certificateCode'] = item['certificateCode'].replace('建〔造〕', '建[造]')
             if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-        self.calcPerson(personDic)
+#        self.calcPerson(personDic)
 #        return
     
         #**************************************************************************************
-        print 'deal anquangongchengshi_table..'        
-        #写安全工程师
+        print 'deal anquangongchengshi_table..: WCEngineer'        
+        #含造价工程师、造价员、注册建造师、安考证
         common = [['qualificationCertNum', 'certificateCode'], ['workingCompany', 'companyName'], ['personType', 'type']]
         lsclr = ['validityDate', 'professional', 'location', 'staffLevel']        
         lsn = { '造价员':1, '造价工程师':1, '质量检测员':1, '建造师':1 }
@@ -328,36 +340,34 @@ class CReadData2ES(object):
                 item['staffLevel'] = item['gridViewPersonAptitudes'][0]['level']
                 item['certificateCode'] = item['gridViewPersonAptitudes'][0]['certificateNumber']
             item['personId'] = 'idcard-'+ item['idCard']
-            if item['type'] in lsn: item['professional'] = '水利'          
+            if item['type'].encode('utf8') in lsn: item['professional'] = '水利'       
             if 0 == self.jianzaoshi_process(item, lsNames, personDic):break
-        self.calcPerson(personDic)
+#        self.calcPerson(personDic)
 #        return
-        
     
-        return
+#        return
+        #************************************写数据*********************************************
+        lsCompany = {}
+        for item in db3.companyInfoNew.find({}).limit(1):lskey = dict((key, 0) for key in item if key!='company_name' and key !='id') 
+        for item in db3.companyInfoNew.find({}, lskey): lsCompany[item['company_name'].encode('utf8')] = item['id']
         index = 50000000
         for p in personDic:
-            personDic[p]['companyname'] = personDic[p]['companyname'].keys() 
+            cps = personDic[p]['companyname'].keys()
+            cpname = '' if len(cps)==0 else cps[0].encode('utf8')
+            personDic[p]['companyname'] = cpname 
             ls = personDic[p]['certificate'].values()
             personDic[p]['certificate'] = []
             for c in ls: 
                 personDic[p]['certificate'].append({'name':c[0], 'professional':c[1], 'level':c[2], 'code':c[3], 'validityDate':c[4]})
             index += 1
-            personDic[p]['id'] = str(index)
-            personDic[p]['label'] = ''
+            personDic[p]['company_id'] = lsCompany[cpname] if cpname in lsCompany else 0 
+            personDic[p]['id'] = index
+            personDic[p]['label'] = 0
             personDic[p]['other'] = ''
-            
-            
+            personDic[p]['updateTime'] = datetime.datetime.now()
         print len(personDic)
-#        for line in personDic: write1.insert(personDic[line])
 #        write1.insert(personDic.values())
         return
-        '''
-        #8月18日加班完成以上功能
-        #以下内容已弃用，
-        '''
-        return
- 
      
     #--------------------------------------------------------------------------------
     #通用处理过程合并
@@ -380,207 +390,7 @@ class CReadData2ES(object):
 #                print personId,personDic[personId]['name'],
 #                cout(personDic[personId]['companyname'])
         return ES_Dict       
-            
-    def dealPerson(self):
-        #        connection = pymongo.Connection('192.168.3.45', 27017)
-        connection = MongoClient('192.168.3.45', 27017)
-        db = connection['constructionDB']
-        con = MongoClient('localhost', 27017)
-        db2 = con['middle']
-        write = db2.person
-        self.writer = write 
-        con1 = MongoClient('171.221.173.154', 27017)
-        db1 = con1['jianzhu']
-        write1 = db1.person5
-        
-        company_table = db.EInPQualification
-        ankaozheng_table = db.WCSafetyEngineer
-        anquangongchengshi_table = db.safetyEngineer
-        
-        ankaozheng_table = db.WCSafetyEngineer
-        anquangongchengshi_table = db.safetyEngineer
-        
-        index = 0
-        lsAll = []
-        personDic = {}
-        lsNames = {}
-        lsInfo = {}
-        
-        lsPerson = {}
-        index = db2.person5.find().count() + 50000000 + 1
-        for item in db2.person5.find():
-            name = item['name']
-            cpname = item['companyname'][0]
-            personId = item['personId']
-            lsPerson[personId] = item
-            if name not in lsNames: 
-                lsNames[name] = {'companyname': { cpname: personId }}
-            else:
-                if cpname not in lsNames[name]['companyname']: lsNames[name]['companyname'][cpname] = personId
-        
-        temp = { '其他安全':'', '危险物品安全':'', '煤矿安全':'', '非煤矿矿山安全':'', '建筑施工安全':''}
-        lsIf = {}
-        
-        #处理安证
-        for item in db.safetyEngineer.find():
-            tp = item['registeredType']
-            pname = item['engineerName']
-            cpname = item['workUnits']
-            if tp == '': continue
-            lv = ""
-            if tp.find('其他安全')>=0:
-                lv = re.split('\(|\)', tp)[1].encode('utf8')
-                lvs = ['农业','水利','电力','消防','交通','其他']
-                if lv not in dict([[l, 1] for l in lvs]): lv = '其他'
-                tp = '其他安全'
-            if tp.find('危险物品安全')>=0: tp = '危险物品安全'
-            if tp.encode('utf8') not in temp: continue
-            ctf = {'name':'注册安全工程师', 'professional':tp, 'level':lv, 'code':item['engineerCode'], 
-                   'validityDate': Date_F(item['validityDate'])}
-            
-            personId = 'safe-engineerCode'+ item['engineerCode']
-            #无记录 但 有名字且公司名相同
-            if personId not in lsPerson:
-                if pname in lsNames and cpname in lsNames[pname]['companyname']:    #可与原记录合并
-                    personId = lsNames[pname]['companyname'][cpname]
-                    lsPerson[personId]['certificate'].append(ctf)
-                else:   #新纪录
-                    lsPerson[personId] = {'id':str(index),'name':pname, 'companyname':[cpname], 'label':'', 'other':'', 'personId':personId, 'certificate':[ctf]}
-                    index += 1
-            else: 
-                lsPerson[personId]['certificate'].append(ctf)
-#        write.insert(lsPerson.values())
-        
-#        out( lsInfo)
-        return
-        index = 50000000
-        for p in personDic:
-            personDic[p]['companyname'] = personDic[p]['companyname'].keys() 
-            ls = personDic[p]['certificate'].values()
-            personDic[p]['certificate'] = []
-            for c in ls:
-                personDic[p]['certificate'].append({'name':c[0], 'professional':c[1], 'level':c[2], 'code':c[3], 'validityDate':c[4]})
-            index += 1
-            personDic[p]['id'] = str(index)
-            personDic[p]['label'] = ''
-            personDic[p]['other'] = ''
-        write1.insert(personDic.values())
-        return
 
-#        #**************************************************************************************
-#        print 'deal ankaozheng_table..'
-#        # 写安考证
-#        common = [['engineerName', 'name'], ['engineerGender', 'gender'], ['engineerTitle', 'title'], ['idcard', 'idcard'], ['certificateCode', 'ak_code'], ['certificateStatus', 'ak_status'], ['validityDate', 'ak_validityDate'], ['companyType', 'ak_companytype']]
-#        for item in ankaozheng_table.find():
-#            self.common_process(common, item, lsNames, personDic, 'idcard', 'certificateCode', 'workUnits')
-#        print 'collect ', len(personDic), 'items.'
-##        return
-#        
-#        #**************************************************************************************
-#        print 'deal anquangongchengshi_table..'        
-#        #写安全工程师
-#        common = [['engineerName', 'name'], ['engineerGender', 'gender'], ['companyType', 'aq_companytype'], ['registeredType', 'aq_registeredtype'], ['validityDate', 'aq_validitydate'], ['engineerCode', 'aq_code']]
-#        for item in anquangongchengshi_table.find():
-#            self.common_process(common, item, lsNames, personDic, 'engineerCode', 'engineerCode', 'workUnits')
-#        print 'collect ', len(personDic), 'items.'
-##        return
-#    
-#        #**************************************************************************************
-#        print 'deal zaojiashi_table..'
-#        #写造价工程师
-#        common = [['engineerName', 'name'], ['engineerGender', 'gender'], ['branchCompany', 'branchcompany'], ['registeredAgencies', 'zj_registeredagencies'], ['status', 'zj_code'], ['registeredNumb', 'zj_code']]
-#        for item in zaojiashi_table.find():
-#            self.common_process(common, item, lsNames, personDic, 'registeredNumb', 'registeredNumb', 'registeredCompany')
-#        print 'collect ', len(personDic), 'items.'
-##        return
-#        
-#        for p in personDic:
-#            personDic[p]['companyname'] = personDic[p]['companyname'].keys()
-#        write.insert(personDic.values())
-#        return
-#        
-#        #写公司资质
-#        common = [['qualificationType', 'company_qualificationType'], ['professionalType', 'company_professionalType'], ['professionalLevel', 'company_professionalLevel']]
-#        for item in  company_table.find():
-#            ES_Dict = {}
-#            for c in common: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
-#        
-#        return
-#    
-        #写公司（这里会出现重名BUG，但不管啦）
-#        res = self.es.index(index="jh-index", doc_type='jh-type',id=(ES_Dict["companyname"] + "#" + ES_Dict["name"]), body=ES_Dict)
-
-#统计
-def select():
-    #        connection = pymongo.Connection('192.168.3.45', 27017)
-    con = MongoClient('localhost', 27017)
-    db2 = con['middle']
-    person = db2.person
-    company = db2.companyInfo
-    
-    keyp = ['注册建造师', '安考证', '造价工程师', '造价员', '注册安全工程师']
-    for k in keyp: print k, ': ', person.find({'certificate.name':k }).count()
-    #打印同时多个证人数矩阵
-    print '\t',
-    for k in keyp: print k,'\t',
-    print
-    for i in range(len(keyp)):
-        print keyp[i],'\t',
-        for j in range(len(keyp)): print person.find({'$and':[{'certificate.name':keyp[i]},{'certificate.name':keyp[j]}]}).count(),'\t',
-        print
-    
-    return
-    lsA = {}
-#    for item in company.find():
-#        for line in item['qualificationType']:
-#            if line['name'] not in lsA: lsA[line['name']] =1
-#            else: lsA[line['name']] +=1
-#    cout(lsA)
-#    #公司资质统计
-#    a = ['设计与施工一体化','专业承包','总承包','园林绿化']
-    for item in company.find():
-        for line in item['qualificationType']:
-            if line['name'] not in lsA: lsA[line['name']] = {}
-            for ln in line['professionalType']:
-                if ln['name'] not in lsA[line['name']]: lsA[line['name']][ln['name']] = {}
-                else: #等级
-                    for lv in ln['professionalLevel']:
-                        if lv not in lsA[line['name']][ln['name']]: lsA[line['name']][ln['name']][lv] = 1
-                        else: lsA[line['name']][ln['name']][lv] += 1
-    for ll in lsA:
-        print ll
-        for l in lsA[ll]:
-            print '\t', l
-            for t in lsA[ll][l]: print '\t\t', t, '\t', lsA[ll][l][t]     
-    return
-    cIndex = 0
-    bIndex = 0
-    gIndex = 0
-    qIndex = 0
-    for item in company.find():
-        if 'courtRecords' in item and len(item['courtRecords'])>0: cIndex += 1
-        if len(item['badbehaviors']['badBehaviorDetails'])>0: bIndex += 1
-        if len(item['goodbehaviors'])>0: gIndex += 1
-        if len(item['qualificationType'])>0: qIndex += 1
-    print '诉讼记录', cIndex    
-    print '不良记录', bIndex    
-    print '优良记录', gIndex
-    print '公司资质', qIndex
-    print '建造师', company.find({'certificate.type':'建造师'}).count()
-    print '无资质公司', company.find({'qualificationType':[]}).count()
-    
-    cout(lsA)
-#    keyc = ['施工总承包', '专业承包', '', '造价员', '注册安全工程师']
-    
-#        print
-    
-#    for k in keyp: print k, ': ', person.find({'certificate.name':k }).count()
-#    print person.find({'certificate.name':'安考证', 'certificate.name':'安考证'}).count()
-#    print person.find({'certificate.name':'安考证', 'certificate.name':'造价员'}).count()
-
-#    for item in person.find({'certificate':{'name':}}):
-        
-    
     
 def Code_F(dic):
     return dict([[k.decode('gb18030'), dic[k].decode('gb18030')] for k in dic.keys()])
@@ -597,7 +407,7 @@ print 'Hello Moto..'
 dt = datetime.datetime.now()
 
 md = CReadData2ES()
-md.ReadMongoTable()
+md.dealPerson()
 
 
 #md.dealPerson()
