@@ -25,16 +25,17 @@ def addCompanyBidding():
     con3 = MongoClient('171.221.173.154', 27017)
     db1 = con1['middle']
     db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
-    write = db3.bidding
+#    db3 = con3['jianzhu3']
+    write = db1.bidding2
     
     lsComp = {}
     lsTemp = {}
     lsUpdate = []
-    lskey = P.dbKeys(db1.bidding, ['id'])
-    index = db1.bidding.find({}, lskey).sort('id', -1).limit(1)[0]['id'] + 1
+#    lskey = P.dbKeys(db1.bidding, ['id'])
+#    index = db1.bidding.find({}, lskey).sort('id', -1).limit(1)[0]['id'] + 1
+    index = P.getMaxId(db1.bidding2, 'id') + 1
     print 'select company list for id.'
-    lsCpId = P.getCompanyId(db3.companyInfoNew)
+    lsCpId = P.getCompanyId(db1.companyInfoNew2)
     print 'select useful company.'
     for item in db2.companyAchievement.find({}, P.dbKeys(db2.companyAchievement, ['companyName'])): 
         lsComp[item['companyName'].encode('utf8')] = 1
@@ -45,11 +46,13 @@ def addCompanyBidding():
         if cpname=='' or cpname not in lsComp: continue
         lsTemp[cpname+'_'+pj] = 1
     print 'read new bidding of company.'
+    lsmd5 = {}
     cpl = ['sources', 'sourcesUrl', 'biddingDate', 'biddingPrice', 'projectName', 'architects']
     for item in db2.companyAchievement.find({'biddingDetail':{'$gt':[]}}):
         cpname = item['companyName'].encode('utf8')
         for b in item['biddingDetail']:
-            pj = b['projectName'][:-4].encode('utf8')
+            pj = b['projectName'][:-4].strip().encode('utf8')
+            
             if cpname+'_'+pj in lsTemp: continue
             line = dict((k, b[k]) for k in cpl)
             if line['biddingPrice'].encode('utf8').find('暂无信息')!=-1: line['biddingPrice'] = ''
@@ -61,6 +64,9 @@ def addCompanyBidding():
             line['company_name'] = cpname
             line['label'] = 0
             line['company_id'] = 0 if cpname not in lsCpId else lsCpId[cpname]
+            lmd5 = ','.join([line['projectName'], line['sourcesUrl'], line['company_name']])
+            if lmd5 in lsmd5: continue
+            lsmd5[lmd5] = 1
             line['id'] = index
             index += 1 
             lsUpdate.append(line)
@@ -78,7 +84,7 @@ def addBiddingCompanyId():
     db3 = con3['jianzhu3']
     write = db1.bidding
     
-    index = 0
+    index = 0   
     lskey = {}
     lsCompany = {}
     lsUpdate = []
@@ -134,6 +140,17 @@ def selectCompanyPersonCount():
     for item in db1.temp.find().sort('count', -1).limit(100):
         print item['company_name'], item['count']
 
+def temp1():
+    con1 = MongoClient('localhost', 27017)
+    con2 = MongoClient('192.168.3.45', 27017)
+    con3 = MongoClient('171.221.173.154', 27017)
+    db1 = con1['middle']
+    db2 = con2['constructionDB']
+    db3 = con3['jianzhu3']
+    
+    
+    
+
 def temp():
     con1 = MongoClient('localhost', 27017)
     con3 = MongoClient('171.221.173.154', 27017)
@@ -160,13 +177,14 @@ def temp():
         if index % 5000 == 0: print index
     print 'OK!'
     
+    
 if __name__ == '__main__':
     dt = datetime.datetime.now()
 #    addBiddingCompanyId()
 #    temp()
 #    selectCompanyPersonCount()
-    addCompanyBidding()
-    
+#    addCompanyBidding()
+    temp1()
     
     
 

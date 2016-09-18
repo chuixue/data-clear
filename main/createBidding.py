@@ -1,6 +1,6 @@
-#encoding:utf8
+#coding:utf8
 '''
-Created on Aug 31, 2016
+Created on Sep 14, 2016
 
 @author: Administrator
 '''
@@ -34,6 +34,12 @@ def cout(ls):
 def out(ls):
     for l in ls: print l,
     print
+def Date_F(str):
+#    str = str.decode('utf8')
+    if not str or str == '': return ''
+    if not (str.find("年")>0 and str.find("月")>0): return str
+    sp = re.split("年|月".decode('utf8'), str)
+    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
 def getLine(_title, _source): 
     return {'name':_title, 'source':_source, 'url':'', 'companys':[], 'price':'', 'architects':'', 'content':'', 'type':'' }
@@ -70,15 +76,6 @@ def readHtmlInfo(html, line):
     return 1
 #四张表业绩信息    
 def deal_gsi():
-    con1 = MongoClient('localhost', 27017)
-    con2 = MongoClient('192.168.3.45', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
-    db1 = con1['middle']
-    db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
-    db4 = con1['jianzhu']
-    write = db1.bidding2
-    
     fdn = ['projectName', 'biddingPrice', 'biddingDate', 'sourcesUrl', 'architects', 'content', 'company_name', 'type', 'sources', 'announcementId', 'updateTime']
     fdv = ['', '', '', '', '', '', '', '招标', '四川省政府政务服务和公共资源交易服务中心', '', datetime.datetime.now()]
     lsmd5 = {}
@@ -125,6 +122,7 @@ def deal_gsi():
     print ErrIndex, 'error records.'
     print "collect", len(lsAll), 'records'
 
+    lsjstId = {}
     fdv[8] = '四川省住房和城乡建设厅'
     #****************************************************************************************
     lsmd5 = {}
@@ -138,10 +136,12 @@ def deal_gsi():
         line['biddingPrice'] = item['biddingMessage'][0]['biddingPrice'] + '万'
         line['architects'] = item['biddingMessage'][0]['projectManager']
         line['content'] = item['projectBase'][0]['investmentScale']
-        if 'detailUrl' in item: line['sourcesUrl'] = item['detailUrl']
+        if 'detailUrl' in item: line['sourcesUrl'] = item['detailUrl'].strip()
         lmd5 = ','.join([line['projectName'], line['biddingDate'], line['announcementId'], line['company_name']])
         if lmd5 in lsmd5: print lmd5
         lsmd5[lmd5] = 1
+        ida = re.findall('(?<=id\=)([\s\S]+?)(?<=$)', line['sourcesUrl']); id = ida[0] if len(ida)>0 else ''   
+        if id!='': lsjstId[id+line['company_name']] = 1
         index += 1
         lsAll.append(line)
     print "collect", len(lsAll), 'records'
@@ -181,13 +181,20 @@ def deal_gsi():
             lmd5 = ','.join([line['projectName'], line['biddingDate'], line['company_name']])
             if lmd5 in lsmd5: continue
             lsmd5[lmd5] = 1
+            '''''''''去掉id重复的'''''''''''''''''''''
+            ida = re.findall('(?<=id\=)([\s\S]+?)(?<=$)', line['sourcesUrl']); id = ida[0] if len(ida)>0 else ''   
+            if id!='':
+                pid = id+line['company_name']
+                if pid in lsjstId: continue   
+                else: lsjstId[pid] = 1
+            ''''''''''''''''''''''''''''''''''''''
             index += 1
             lsAll.append(line)
     print "collect", len(lsAll), 'records'
-    
+#    return
     #*************************************写数据*************************************
     index = 60000001
-    lsCpId = P.getCompanyId(db1.companyInfoNew2)
+    lsCpId = P.getCompanyId(companyInfo)
     for line in lsAll:
         cpname = line['company_name'].encode('utf8')
         line['id'] = index
@@ -195,27 +202,75 @@ def deal_gsi():
         line['company_id'] = 0 if cpname not in lsCpId else lsCpId[cpname]
         index += 1
     write.insert(lsAll)
-    
-def getContent(line):
-    pass
-#    for item in db2.gs_bidCandidate.find():
-#        pass
-#    for item in db2.gst_bidResult.find():pass
-#    for item in db2.gst_project.find():pass
-    
-#    print index
 
-def Date_F(str):
-#    str = str.decode('utf8')
-    if not str or str == '': return ''
-    if not (str.find("年")>0 and str.find("月")>0): return str
-    sp = re.split("年|月".decode('utf8'), str)
-    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
+#将companyAchievement表业绩统一整理到业绩表   
+def addCompanyBidding():    
+    source = db2.companyAchievement
+    lsComp = {}
+    lsTemp = {}
+    lsUpdate = []
+    index = P.getMaxId(write, 'id') + 1
+    print 'select company list for id.'
+    lsCpId = P.getCompanyId(companyInfo)
+    print 'select useful company.'
+    for item in source.find({}, P.dbKeys(source, ['companyName'])): 
+        lsComp[item['companyName'].encode('utf8')] = 1
+    print 'read existing bidding of company.'
+    for item in bidding.find({'type':'中标'}):
+        cpname = item['company_name'].encode('utf8')
+        pj = item['projectName'].encode('utf8')
+        if cpname=='' or cpname not in lsComp: continue
+        lsTemp[cpname+'_'+pj] = 1
+    print 'read new bidding of company.'
+    lsmd5 = {}
+    cpl = ['sources', 'sourcesUrl', 'biddingDate', 'biddingPrice', 'projectName', 'architects']
+    for item in source.find({'biddingDetail':{'$gt':[]}}):
+        cpname = item['companyName'].encode('utf8')
+        for b in item['biddingDetail']:
+            pj = b['projectName'][:-4].strip().encode('utf8')
+            if cpname+'_'+pj in lsTemp: continue
+            line = dict((k, b[k]) for k in cpl)
+            if line['biddingPrice'].encode('utf8').find('暂无信息')!=-1: line['biddingPrice'] = ''
+            line['projectName'] = pj
+            line['updateTime'] = datetime.datetime.now()
+            line['biddingDate'] = line['biddingDate'].strip() 
+            line['type'] = '中标'
+            line['content'] = ''
+            line['announcementId'] = ''
+            line['company_name'] = cpname
+            line['label'] = 0
+            line['company_id'] = 0 if cpname not in lsCpId else lsCpId[cpname]
+            lmd5 = ','.join([pj, line['sourcesUrl'], line['company_name']])
+            if lmd5 in lsmd5: continue
+            lsmd5[lmd5] = 1
+            line['id'] = index
+            index += 1 
+            lsUpdate.append(line)
+    print 'insert new records,',len(lsUpdate), '...'
+    write.insert(lsUpdate)
+    print 'complete!'
 
 if __name__ == '__main__':
     dt = datetime.datetime.now()
+    con1 = MongoClient('localhost', 27017)
+    con2 = MongoClient('192.168.3.45', 27017)
+    con3 = MongoClient('171.221.173.154', 27017)
+    db1 = con1['middle']
+    db2 = con2['constructionDB']
+    db3 = con3['jianzhu3']
+    db4 = con1['jianzhu']
+    bidding = db1.bidding
+    write = db1.bidding
+    companyInfo = db1.companyInfoNew
     
     deal_gsi()
-
+    addCompanyBidding()
+    
     print datetime.datetime.now(), datetime.datetime.now()-dt
+
+
+
+
+if __name__ == '__main__':
+    pass

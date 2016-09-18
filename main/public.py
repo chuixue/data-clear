@@ -13,4 +13,5 @@ def getCompanyId(table):
     return dict((item['company_name'].encode('utf8'), 
                  item['id']) for item in table.find({}, dbKeys(table, ['company_name', 'id']))) 
 
- 
+def getMaxId(table, name):
+    return table.find({}, dbKeys(table, [name])).sort(name, -1).limit(1)[0][name]

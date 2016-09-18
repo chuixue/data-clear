@@ -1,6 +1,6 @@
-#encoding:utf8
+#coding:utf8
 '''
-Created on Sep 1, 2016
+Created on Sep 14, 2016
 
 @author: Administrator
 '''
@@ -31,17 +31,9 @@ def Date_F(str):
     sp = re.split("年|月".decode('utf8'), str)
     return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
+
 #更新所有诉讼记录    线上    0:34:01.796000    线下    0:03:20.164000
 def updateNewCourt():
-    con1 = MongoClient('localhost', 27017)
-    con2 = MongoClient('192.168.3.45', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
-    db1 = con1['middle']
-    db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
-    
-    write = db1.companyInfoNew2
-    
     index = 0
     lsCourt = {}
     lsTemp = {}
@@ -92,7 +84,7 @@ def updateNewCourt():
     #*************************************************************************************
     print 'read companyInfoNew table...'
     lsUpdate = []
-    lsCpId = P.getCompanyId(db1.companyInfoNew2)
+    lsCpId = P.getCompanyId(companyInfo)
     for cp in lsCourt:
         if cp in lsCpId: lsUpdate.append([{'id':lsCpId[cp]}, {'$set':{'courtRecords':lsCourt[cp].values()}}])
     index = 0
@@ -102,56 +94,9 @@ def updateNewCourt():
         index += 1
         if index % 5000 == 0: print '\t',index
     print index, 'complete!'
-    
-#
-##更新公司诉讼记录    -    0:01:58.866000s
-#def updateCourt():
-#    con1 = MongoClient('localhost', 27017)
-#    con2 = MongoClient('192.168.3.45', 27017)
-#    con3 = MongoClient('171.221.173.154', 27017)
-#    db1 = con1['middle']
-#    db2 = con2['constructionDB']
-#    db3 = con3['jianzhu3']
-#    
-#    write = db1.companyInfoNew2
-#    
-#    index = 0
-#    lsCourt = {}
-#    lsTemp = {}
-#    lsUpdate = []
-#    for item in db2.courtRecord.find():
-#        cpname = item['companyName'] if 'companyName' in item else item['pname']    #有人名
-#        if cpname not in lsCourt: lsCourt[cpname] = []
-#        if item['caseCode'].encode('utf8') in lsTemp: continue #未测试 
-#        lsTemp[item['caseCode'].encode('utf8')] = 1
-#        lsCourt[cpname].append(item)
-#    
-#    for item in db1.companyInfoNew.find():
-#        obj = {}
-#        cp = item['company_name']
-#        if cp in lsCourt: obj['courtRecords'] = lsCourt[cp]
-#        if len(obj)==0: continue
-#        obj['updateTime'] = datetime.datetime.now()
-##        write.update({'company_name':cp}, {'$set':obj })
-#        lsUpdate.append([{'id':item['id']}, {'$set':obj}])
-#    for d in lsUpdate:
-#        index += 1
-#        if index % 2000 ==0: print index, d[0] 
-#        write.update(d[0], d[1])
-#    print '源诉讼公司数：', len(lsCourt)
-#    print '更新公司数：', index
 
 #更新荣誉、操作二字段信息    -    0:06:20.632000
 def updateHonors():
-    con1 = MongoClient('localhost', 27017)
-    con2 = MongoClient('192.168.3.45', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
-    db1 = con1['middle']
-    db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
-    
-    write = db1.companyInfoNew2
-     
     index = 0
     lsHonor = {}
     lsoperation = {}
@@ -159,7 +104,7 @@ def updateHonors():
     for item in db2.companyAchievement.find():
         if len(item['honors'])>0: lsHonor[item['companyName']] = item['honors']
         lsoperation[item['companyName']] = item['operationDetail']
-    for item in db1.companyInfoNew2.find():
+    for item in companyInfo.find():
         obj = {}
         cpname = item["company_name"]
         if cpname in lsHonor: obj['honors'] = lsHonor[cpname]
@@ -176,17 +121,9 @@ def updateHonors():
     print index, 'complete!'
     print '共更新公司总数：',index
     
+    
 #更新优良、不良记录    -    0:00:20.538000
 def updateGoodRecord():
-    con1 = MongoClient('localhost', 27017)
-    con2 = MongoClient('192.168.3.45', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
-    db1 = con1['middle']
-    db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
-    
-    write = db1.companyInfoNew2
-    
     index = 1
     lsBad = {}
     lsGood = {}
@@ -195,7 +132,7 @@ def updateGoodRecord():
         if len(item['goodBehavior'])>0: lsGood[item['companyName']] = item['goodBehavior']
     for item in db2.badBehavior.find():
         lsBad[item['companyName']] = [item['creditScore'], item['badBehaviorDetail'], item['detail_source'], item['detail_url']] 
-    for item in db1.companyInfoNew2.find():
+    for item in companyInfo.find():
         st = {}
         cpname = item['company_name']
         if cpname in lsBad: 
@@ -213,30 +150,21 @@ def updateGoodRecord():
 
 #给公司表添加公司其它基本信息
 def updateCompanyBase():
-    con1 = MongoClient('localhost', 27017)
-    con2 = MongoClient('192.168.3.45', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
-    db1 = con1['middle']
-    db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
-    
-    write = db1.companyInfoNew2
-    
     index = 0
     lsAch = {}
     lsUpdate = []
-#    temp = {'company_name':1, 'id':1, 'companyBases':1}
-#    for item in db3.companyInfoNew.find({}).limit(1):lskey = dict((key, 0) for key in item if key not in temp)
-    lskey = P.dbKeys(db3.companyInfoNew, ['company_name', 'id', 'companyBases'])
+    lskey = P.dbKeys(companyInfo, ['company_name', 'id', 'companyBases'])
+    print 'read the source table...'
     for item in db2.companyAchievement.find():
         line = dict((k, '') for k in ['contactPhone', 'fax', 'address', 'postcode' ])
         for key in line: line[key] = item['companyContact'][0][key] 
+        if line['address'].find('出现错误')!=-1: line['address'] = '暂无信息' 
         line['profile'] = item['companyProfile'][0]['profile'] if len(item['companyProfile'])>0 else ''
         line['profile'] = line['profile'].encode('utf8')[16:].strip() 
         lsAch[item['companyName'].encode('utf8')] = line
         
     print 'read the companyInfoNew...'
-    for item in db3.companyInfoNew.find({}, lskey):
+    for item in companyInfo.find({}, lskey):
         cpname = item['company_name'].encode('utf8')
         line = dict((k, '') for k in ['contactPhone', 'fax', 'address', 'postcode', 'profile'])
         if cpname in lsAch: line = lsAch[cpname]; 
@@ -256,89 +184,21 @@ def updateCompanyBase():
         index += 1
     print 'complete', len(lsUpdate), 'records.'
     
-    
-##更新所有附加信息    -    0:06:23.216000
-#def updateCompanyOther():   
-#    con1 = MongoClient('localhost', 27017)
-#    con2 = MongoClient('192.168.3.45', 27017)
-#    con3 = MongoClient('171.221.173.154', 27017)
-#    db1 = con1['middle']
-#    db2 = con2['constructionDB']
-#    db3 = con3['jianzhu3']
-#    
-#    write = db1.companyInfoNew2
-#    
-#    index = 0
-#    lsBad = {}
-#    lsGood = {}
-#    lsCourt = {} 
-#    lsHonor = {}
-#    lsBidding = {}
-#    lsoperation = {}
-#    lsUpdate = []
-#    for item in db2.courtRecord.find():
-#        cpname = item['companyName'] if 'companyName' in item else item['pname']    #有人名
-#        if cpname not in lsCourt: lsCourt[cpname] = []
-#        lsCourt[cpname].append(item)
-#    for item in db2.goodBehavior.find():
-#        if item['goodBehavior'] != []: lsGood[item['companyName']] = item['goodBehavior']
-#    for item in db2.badBehavior.find():
-#        lsBad[item['companyName']] = [item['creditScore'], item['badBehaviorDetail']] 
-#    for item in db2.companyAchievement.find():
-#        if len(item['biddingDetail'])>0: 
-#            lsBidding[item['companyName']] = []
-#            for line in item['biddingDetail']:
-#                if line['projectName'] == '': continue
-#                if line['projectName'][-4:] == "[反馈]": line['projectName'] = line['projectName'][0:-4]
-#                lsBidding[item['companyName']].append(line)
-#        if len(item['honors'])>0: lsHonor[item['companyName']] = item['honors']
-#        lsoperation[item['companyName']] = item['operationDetail']
-#    
-#    for item in db1.companyInfoNew.find():
-#        obj = {}
-#        cpname = item['company_name']
-#        if cpname in lsBad: 
-#            obj['badbehaviors'] = {"creditScore": lsBad[cpname][0], "badBehaviorDetails": lsBad[cpname][1] }
-#        if cpname in lsGood: obj['goodbehaviors'] = lsGood[cpname]
-#        if cpname in lsCourt: obj['courtRecords'] = lsCourt[cpname]
-#        if cpname in lsHonor: obj['honors'] = lsHonor[cpname]
-#        if cpname in lsBidding: obj['bidding'] = lsBidding[cpname]
-#        if len(obj)==0: continue
-#        obj['updateTime'] = datetime.datetime.now()
-#        
-#        write.update({'id': item['id'] }, {'$set':obj })
-#        if index % 5000 ==0: print index, cpname
-#        index += 1
-        
-#def clearInfo():
-#    con1 = MongoClient('localhost', 27017)
-#    con2 = MongoClient('192.168.3.45', 27017)
-#    con3 = MongoClient('171.221.173.154', 27017)
-#    db1 = con1['middle']
-#    db2 = con2['constructionDB']
-#    db3 = con3['jianzhu3']
-#    
-#    write = db1.companyInfoNew2
-#    
-#    index = 0
-#    for item in db1.companyInfoNew.find():
-#        cpname = item['company_name']
-#        write.update({'company_name':cpname},{'$set':{'honors':[], 'bidding':[], 'goodbehaviors':[], 
-#                                'operationDetail':[], 'courtRecords':[], 'operationDetail':[]}})
-#        if index % 5000 == 0: print index
-#        index += 1
         
 if __name__ == '__main__':
     dt = datetime.datetime.now()
-#    clearInfo()
-#    updateCourt()#已弃用
-#    updateBidding()
-#    updateCompanyOther()
+    con1 = MongoClient('localhost', 27017)
+    con2 = MongoClient('192.168.3.45', 27017)
+    con3 = MongoClient('171.221.173.154', 27017)
+    db1 = con1['middle']
+    db2 = con2['constructionDB']
+    db3 = con3['jianzhu3']
+    companyInfo = db1.companyInfoNew
+    write = db1.companyInfoNew
+
     updateCompanyBase()
     updateGoodRecord()
     updateHonors()
     updateNewCourt()
-#    updateCompanyBase()
-    
-    
+
     print datetime.datetime.now(), datetime.datetime.now()-dt

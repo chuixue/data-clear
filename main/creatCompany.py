@@ -1,6 +1,6 @@
-#encoding:utf8
+#coding:utf8
 '''
-Created on Aug 29, 2016
+Created on Sep 14, 2016
 
 @author: Administrator
 '''
@@ -17,6 +17,12 @@ def cout(ls):
 def out(ls):
     for l in ls: print l,
     print
+def Date_F(str):
+#    str = str.decode('utf8')
+    if not str or str == '': return ''
+    if not (str.find("年")>0 and str.find("月")>0): return str
+    sp = re.split("年|月".decode('utf8'), str)
+    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
 cBase = {'建筑业': ['专业承包', '总承包', '劳务分包', '专项资质', '施工劳务'],
              '工程勘察': ['专业资质', '综合资质', '劳务资质'], 
@@ -56,7 +62,7 @@ def getLinesOut(item):
                     for s in (k+'级' for k in line.split('级') if k!=''): stp.append(s)
                 else: stp.append(line)
             for line in stp:
-                line = re.sub('(旧)', '', line)
+                line = line.encode('utf8').replace('(旧)', '')
                 if ctype=='工程设计' and line.find('工程勘察')!=-1 and line.find('设计')==-1: ctype='工程勘察'
                 if ctype=='工程勘察' and line.find('工程设计')!=-1 and line.find('勘察')==-1: ctype='工程设计'
                 stp = re.split('|'.join(cBase[ctype]), line.encode('utf8'))
@@ -116,14 +122,6 @@ def getLinesOut(item):
     return lines
 #汇总入川企业资质
 def dealCompanyOut():
-    con1 = MongoClient('localhost', 27017)
-    con2 = MongoClient('192.168.3.45', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
-    db1 = con1['middle']
-    db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
-    write = db1.companyInfoNew2
-
     lsComp = {}
     for item in db2.EOutProvenceDetail.find():
         cp = item['companyName']
@@ -168,7 +166,7 @@ def dealCompanyOut():
                                                   'level':line[3], 'code':line[4], 'validityDates':line[5] }
             lsComp[cp]['companyBases']['enterpriseType'][ctype] = 1
     print 'select the max id.'
-    index = P.getMaxId(db1.companyInfoNew2, 'id') + 1
+    index = P.getMaxId(companyInfo, 'id') + 1
     dt = []
     for comp in lsComp:
         lsComp[comp]['companyBases']['enterpriseType'] = lsComp[comp]['companyBases']['enterpriseType'].keys()
@@ -202,8 +200,8 @@ def getLines(item):
             for line in stp:
                 stp = re.split('|'.join(cBase[ctype]), line.encode('utf8'))
                 p = findp(ctype, line)       #大类，分类，专业，级别, 证书，有效期
-                row = [ctype, p[0], '', '', c['qc_code'], Date_F(c['qc_validityDate'])]
                 if p==[]: continue
+                row = [ctype, p[0], '', '', c['qc_code'], Date_F(c['qc_validityDate'])]
                 if len(stp)==3: 
                     if stp[0]=='' and stp[1]=='':
                         if ctype=='工程监理': row[2] = '工程监理综合资质'
@@ -244,7 +242,6 @@ def dealCompany():
     db1 = con1['middle']
     db2 = con2['constructionDB']
     db3 = con3['jianzhu3']
-    write = db1.companyInfoNew2
     lst = {}    
     
     st = set()
@@ -285,72 +282,21 @@ def dealCompany():
         dt.append(lsComp[comp])
     print 'write', len(lsComp), 'records'
     write.insert(dt)
-    
-#        for item in company.find(): #来自公司资质表
-#            for k in tpKey: item[k[0]] = k[1]
-#            ls[item['company_name']] = item
-#            if item['company_name'] in companyDic: 
-#                for e in companyDic[item['company_name']]:ls[item['company_name']][e] = companyDic[item['company_name']][e]
-#            else:
-#                if 'certificate' not in ls[item['company_name']]: ls[item['company_name']]['certificate'] = []
-#                if 'companyBases' not in ls[item['company_name']]: ls[item['company_name']]['companyBases'] = {}
-#        print len(ls), index
-        
-#        if len(lines)==0: 
-#            for l in item['certificates']:
-#                if l['qc_code'].find('安许证字')!=-1: continue
-#                if l['qc_qualification']==None and l['qc_level']==None and l['qc_code']=="": continue   #无效 
-#                cout(l)
-                    
-#        lst[type][0].add(list[1])
-#        lst[type][1].add(list[2])
-#        lst[type][2].add(list[3]) 
-                   
-#    for k in lst:
-#        print k, ':'
-#        print '\t类别：'
-#        for e in lst[k][0]: print '\t\t', e
-#        print '\t专业：'
-#        for e in lst[k][1]: print '\t\t', e
-#        print '\t级别：'
-#        for e in lst[k][2]: print '\t\t', e 
-#        print
-#    out(st)
-    
-def select():
-    con1 = MongoClient('localhost', 27017)
-    db1 = con1['middle']
-    lst = {}
-    for item in db1.companyInfoNew.find():
-        for q in item['qualification']:
-            if q['type'] not in lst: lst[q['type']] = {} 
-            if q['class'] not in lst[q['type']]: lst[q['type']][q['class']] = {}
-            if q['professional'] not in lst[q['type']][q['class']]: lst[q['type']][q['class']][q['professional']] = {}
-            if q['level'] not in lst[q['type']][q['class']][q['professional']]: lst[q['type']][q['class']][q['professional']][q['level']] = 0
-            lst[q['type']][q['class']][q['professional']][q['level']] += 1
-            pass
-        
-    for t in lst:
-        print t, ':'
-        for c in lst[t]:
-            print '\t', c, ':'
-            for p in lst[t][c]:
-                print '\t\t', p, ':',
-                for l in lst[t][c][p]:
-                    print l, '', lst[t][c][p][l], ',',
-                print   
-  
-def Date_F(str):
-#    str = str.decode('utf8')
-    if not str or str == '': return ''
-    if not (str.find("年")>0 and str.find("月")>0): return str
-    sp = re.split("年|月".decode('utf8'), str)
-    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
 if __name__ == '__main__':
     print 'Hello '
     dt = datetime.datetime.now()
     #*********************************************
+    con1 = MongoClient('localhost', 27017)
+    con2 = MongoClient('192.168.3.45', 27017)
+    con3 = MongoClient('171.221.173.154', 27017)
+    db1 = con1['middle']
+    db2 = con2['constructionDB']
+    db3 = con3['jianzhu3']
+    write = db1.companyInfoNew
+    companyInfo = db1.companyInfoNew
+    
+    
     dealCompany()
     dealCompanyOut()
 #    select()

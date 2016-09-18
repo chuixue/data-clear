@@ -1,10 +1,9 @@
-#encoding:utf8
+#coding:utf8
 '''
-Created on Sep 1, 2016
+Created on Sep 14, 2016
 
 @author: Administrator
 '''
-
 import pymongo
 from pymongo import MongoClient
 import datetime
@@ -25,7 +24,15 @@ def cout(ls):
 def out(ls):
     for l in ls: print l,
     print
-
+def Code_F(dic):
+    return dict([[k.decode('gb18030'), dic[k].decode('gb18030')] for k in dic.keys()])
+    
+def Date_F(str):
+    str = str.decode('utf8')
+    if not str or str == '': return ''
+    if not (str.find("年")>0 and str.find("月")>0): return str.encode('utf8')
+    sp = re.split("年|月".decode('utf8'), str)
+    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
 class Type(object):
     def __init__(self):self.index = 0
@@ -247,14 +254,7 @@ class CReadData2ES(object):
 
                
     def dealPerson(self):
-        con1 = MongoClient('localhost', 27017)
-        con2 = MongoClient('192.168.3.45', 27017)
-        con3 = MongoClient('171.221.173.154', 27017)
-        db1 = con1['middle']
-        db2 = con2['constructionDB']
-        db3 = con3['jianzhu3']
-        
-        write1 = db1.personNew2
+#        write1 = db1.personNew2
 #        self.writer = write1 
         
         index = 0
@@ -314,7 +314,6 @@ class CReadData2ES(object):
 #        self.calcPerson(personDic)
 #        return
         
-        lsCompany = P.getCompanyId(db1.companyInfoNew2)
         #**************************************************************************************
         print 'deal anquangongchengshi_table..: WCEngineer'        
         #含造价工程师、造价员、注册建造师、安考证
@@ -338,8 +337,23 @@ class CReadData2ES(object):
 #        self.calcPerson(personDic)
 #        return
 
+        '''''''''''''''''''''人名与公司名同归为一人·该部分可去掉'''''''''''''''''''''''''''''''''
+        lsCpPs = {}
+        for p in personDic:
+            cps = personDic[p]['companyname'].keys()
+            cpname = '' if len(cps)==0 else cps[0].encode('utf8')
+            if cpname=='': lsCpPs[p] = personDic[p]; continue
+            key = cpname + '_'+ personDic[p]['name']
+            if key not in lsCpPs: 
+                lsCpPs[key] = personDic[p]
+            else: 
+                lsCpPs[key]['certificate'] = dict(personDic[p]['certificate'], **lsCpPs[key]['certificate'])
+        print len(lsCpPs), 'combine from', len(personDic)    
+        personDic = lsCpPs
+        ''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        
         #************************************写数据*********************************************
-        lsCompany = P.getCompanyId(db1.companyInfoNew2)
+        lsCompany = P.getCompanyId(companyInfo)
         index = 50000000
         for p in personDic:
             cps = personDic[p]['companyname'].keys()
@@ -356,48 +370,33 @@ class CReadData2ES(object):
             personDic[p]['other'] = ''
             personDic[p]['updateTime'] = datetime.datetime.now()
         print len(personDic)
-        write1.insert(personDic.values())
+        write.insert(personDic.values())
         return
      
-    #--------------------------------------------------------------------------------
-    #通用处理过程合并
-    def common_process(self, common, item, lsNames, personDic, card, code, company):
-        ES_Dict = {'companyname':{}}
-        for c in common: self.AddItem2Dict(item,ES_Dict, c[0], c[1])
-        ES_Dict['companyname'][item[company]] = 1
-        name = ES_Dict['name']
-        personId = 're' + item[card]
-        if name not in lsNames: 
-            lsNames[name] = {'companyName':{item[company]:personId}, 'code':{item[code]:personId} }
-            personDic[personId] = ES_Dict
-        else:   #名字出现过
-            if item[code] in lsNames[name]['code']:  #先核对证书
-                return 0
-            if item[company] in lsNames[name]['companyName']:  #后核对公司
-                personId = lsNames[name]['companyName'][item[company]]
-                for e in ES_Dict: personDic[personId][e] = ES_Dict[e]
-#                print name, item[company]
-#                print personId,personDic[personId]['name'],
-#                cout(personDic[personId]['companyname'])
-        return ES_Dict       
 
+if __name__ == '__main__':
+    print 'Hello '
+    dt = datetime.datetime.now()
+    #*********************************************
+    con1 = MongoClient('localhost', 27017)
+    con2 = MongoClient('192.168.3.45', 27017)
+    con3 = MongoClient('171.221.173.154', 27017)
+    db1 = con1['middle']
+    db2 = con2['constructionDB']
+    db3 = con3['jianzhu3']
+    write = db1.personNew
+    companyInfo = db1.companyInfoNew
     
-def Code_F(dic):
-    return dict([[k.decode('gb18030'), dic[k].decode('gb18030')] for k in dic.keys()])
+    md = CReadData2ES()
+    md.dealPerson()
     
-
-def Date_F(str):
-    str = str.decode('utf8')
-    if not str or str == '': return ''
-    if not (str.find("年")>0 and str.find("月")>0): return str.encode('utf8')
-    sp = re.split("年|月".decode('utf8'), str)
-    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
-
-print 'Hello Moto..'
-dt = datetime.datetime.now()
-
-md = CReadData2ES()
-md.dealPerson()
+    
+    
+    #*********************************************
+    print datetime.datetime.now(), datetime.datetime.now()-dt
+    print 'End !'
+    exit
+    
 
 
 #md.dealPerson()
@@ -408,7 +407,3 @@ md.dealPerson()
 #md.person_deal()
 #print Date_F('2012年02月23日')
 #print Date_F('2012-02-03')
-
-
-print datetime.datetime.now(), datetime.datetime.now()-dt
-print 'The End!'

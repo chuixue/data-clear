@@ -7,6 +7,10 @@ Created on Jul 18, 2016
 from pymongo import MongoClient
 import re
 import datetime
+import pymongo
+from pymongo import MongoClient
+import time
+import public as P
 
 def test():
     f=2
@@ -35,8 +39,41 @@ if __name__ == '__main__':
 #    st ='无/&nbsp;2'
 #    price = re.sub('无|/|&nbsp;', '', st)
 #    print price
-    print re.sub('无|/|&nbsp;', '', '1/'.strip().encode('utf8')).strip() 
-
+#    print re.sub('无|/|&nbsp;', '', '1/'.strip().encode('utf8')).strip()
+#    st = '12.34 '.encode('utf8').strip()
+#    s = re.sub(' ', '', st)
+#    s = st.replace(' ', '')
+#    print float(s)
+    st={'k1':12, 'k2':3}
+    ss = {'k3':4, 'k4':6}
+    st+=ss
+    print st
+#    con1 = MongoClient('localhost', 27017)
+#    con2 = MongoClient('192.168.3.45', 27017)
+#    con3 = MongoClient('171.221.173.154', 27017)
+#    db1 = con1['middle']
+#    db2 = con2['constructionDB']
+#    db3 = con3['jianzhu3']
+#    index = 0
+#    person = ''
+#    print P.getMaxId(db1.companyInfoNew2, 'id')
+#    lsComp = {}
+#    for item in db1.personNew.find():
+#        cpname = item['companyname']
+#        for ln in item['certificate']:
+#            if ln['name']=='注册建造师' and ln['professional']=='机电工程':
+#                if cpname not in lsComp: lsComp[cpname] = 1
+#    print len(lsComp)
+    
+#    for item in db1.personNew1.find():
+#        if len(item['certificate'])>index: 
+##            if 50442891==item['id'] or 50688791==item['id']: continue
+#            person = item['id']
+#            index = len(item['certificate'])
+#    print index, person   
+#    print ' '=='\r'
+#    print 1
+    
 #    print re.sub('\s\S', ' \n    ')
     
 #    print len(s)
