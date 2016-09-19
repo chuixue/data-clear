@@ -183,18 +183,21 @@ def updateCompanyBase():
         write.update(d[0], d[1])
         index += 1
     print 'complete', len(lsUpdate), 'records.'
-    
+
+        
         
 if __name__ == '__main__':
     dt = datetime.datetime.now()
     con1 = MongoClient('localhost', 27017)
     con2 = MongoClient('192.168.3.45', 27017)
     con3 = MongoClient('171.221.173.154', 27017)
+    con4 = MongoClient('192.168.3.221', 27017)
     db1 = con1['middle']
     db2 = con2['constructionDB']
     db3 = con3['jianzhu3']
-    companyInfo = db1.companyInfoNew
-    write = db1.companyInfoNew
+    db4 = con4['jianzhu3']
+    companyInfo = db4.companyInfoNew
+    write = db4.companyInfoNew
 
     updateCompanyBase()
     updateGoodRecord()

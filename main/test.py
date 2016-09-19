@@ -11,6 +11,7 @@ import pymongo
 from pymongo import MongoClient
 import time
 import public as P
+import urllib
 
 def test():
     f=2
@@ -44,10 +45,13 @@ if __name__ == '__main__':
 #    s = re.sub(' ', '', st)
 #    s = st.replace(' ', '')
 #    print float(s)
-    st={'k1':12, 'k2':3}
-    ss = {'k3':4, 'k4':6}
-    st+=ss
-    print st
+#    st={'k1':12, 'k2':3}
+#    ss = {'k3':4, 'k4':6}
+#    st+=ss
+#    print st
+    print urllib.quote("百度")
+#    parse.quote('百度')
+    
 #    con1 = MongoClient('localhost', 27017)
 #    con2 = MongoClient('192.168.3.45', 27017)
 #    con3 = MongoClient('171.221.173.154', 27017)

@@ -95,7 +95,7 @@ def selectPerson():
     con = MongoClient('localhost', 27017)
     db1 = con['middle']
     lst = {}
-    for item in db1.personNew2.find():
+    for item in db1.personNew.find():
         for c in item['certificate']:
             if c['name'] not in lst: lst[c['name']] = {} 
             if c['professional'] not in lst[c['name']]: lst[c['name']][c['professional']] = {}

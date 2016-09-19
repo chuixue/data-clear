@@ -4,25 +4,25 @@ Created on Sep 14, 2016
 
 @author: Administrator
 '''
-import pymongo
 from pymongo import MongoClient
-import time
 import datetime
 import re
 from HTMLParser import HTMLParser
 import public as P
+import libBidding as libB
 
-class MyHTMLParser(HTMLParser):
-    def __init__(self):
-        self.reset()
-        self.fed = []
-    def handle_data(self, d): self.fed.append(d)
-    def html(self): return re.sub('\n| ', '', ''.join(self.fed)).strip()
+#class MyHTMLParser(HTMLParser):
+#    def __init__(self):
+#        self.reset()
+#        self.fed = []
+#    def handle_data(self, d): self.fed.append(d)
+#    def html(self): return re.sub('\n| ', '', ''.join(self.fed)).strip()
+#
+#def getHtml(html):
+#    parser = MyHTMLParser()
+#    parser.feed(html)
+#    return parser.html().encode('utf8')
 
-def getHtml(html):
-    parser = MyHTMLParser()
-    parser.feed(html)
-    return parser.html().encode('utf8')
 def log(str):
     fp = open('c:\\t.txt', 'a')
     fp.write(str)
@@ -44,36 +44,36 @@ def Date_F(str):
 def getLine(_title, _source): 
     return {'name':_title, 'source':_source, 'url':'', 'companys':[], 'price':'', 'architects':'', 'content':'', 'type':'' }
 
-def IsPrice(st):
-    lsNum = dict((str(i),1) for i in range(0, 10))
-    lsNum['.'] = 1
-    st = re.sub(',|，|元', '', st)
-    for p in st:
-        if p not in lsNum: return 0
-    return 1
-#解析html中中标公司信息
-def readHtmlInfo(html, line):
-    tds = []; lrow = -1
-    st = re.findall(r'(?=<tr)([\s\S]+?)(?<=<\/tr>)', html)
-    for i in [9, 10, 11, 12]: 
-        tds = re.findall(r'<td.*?>(.*?)<\/td>', st[i])
-        if len(tds)>0  and ('第一名' == tds[0] or '第1名' == tds[0]):
-            lrow = i; break 
-    if lrow==-1 or (len(tds)!=5 and len(tds)!=8): return 0
-    line['company_name'] = re.sub('/|&nbsp;', '', tds[1])
-    price = re.sub('无|/|\\\|&nbsp;', '', tds[3].strip().encode('utf8')).strip()
-    if price=='' or price=='.' or price=='元': price = re.sub('无|/|\\\|&nbsp;', '', tds[2].strip().encode('utf8')).strip() 
-    if IsPrice(price) and price!='' and price!='.': price = str(float(re.sub(',|，|元', '', price)) / 10000) + '万'
-    line['biddingPrice'] = price
-    if len(tds)==5:
-        while lrow<(len(st)-1):
-            pss = re.findall(r'<td.*?>(.*?)<\/td>', st[lrow+1])
-            if len(pss)>0 and re.sub('&nbsp;', '', pss[0].strip())=="项目负责人": 
-                if len(pss)==6: line['architects'] = pss[1]
-                break
-            lrow += 1
-    if len(tds)==8: line['architects'] = tds[5]
-    return 1
+#def IsPrice(st):
+#    lsNum = dict((str(i),1) for i in range(0, 10))
+#    lsNum['.'] = 1
+#    st = re.sub(',|，|元', '', st)
+#    for p in st:
+#        if p not in lsNum: return 0
+#    return 1
+##解析html中中标公司信息
+#def readHtmlInfo(html, line):
+#    tds = []; lrow = -1
+#    st = re.findall(r'(?=<tr)([\s\S]+?)(?<=<\/tr>)', html)
+#    for i in [9, 10, 11, 12]: 
+#        tds = re.findall(r'<td.*?>(.*?)<\/td>', st[i])
+#        if len(tds)>0  and ('第一名' == tds[0] or '第1名' == tds[0]):
+#            lrow = i; break 
+#    if lrow==-1 or (len(tds)!=5 and len(tds)!=8): return 0
+#    line['company_name'] = re.sub('/|&nbsp;', '', tds[1])
+#    price = re.sub('无|/|\\\|&nbsp;', '', tds[3].strip().encode('utf8')).strip()
+#    if price=='' or price=='.' or price=='元': price = re.sub('无|/|\\\|&nbsp;', '', tds[2].strip().encode('utf8')).strip() 
+#    if IsPrice(price) and price!='' and price!='.': price = str(float(re.sub(',|，|元', '', price)) / 10000) + '万'
+#    line['biddingPrice'] = price
+#    if len(tds)==5:
+#        while lrow<(len(st)-1):
+#            pss = re.findall(r'<td.*?>(.*?)<\/td>', st[lrow+1])
+#            if len(pss)>0 and re.sub('&nbsp;', '', pss[0].strip())=="项目负责人": 
+#                if len(pss)==6: line['architects'] = pss[1]
+#                break
+#            lrow += 1
+#    if len(tds)==8: line['architects'] = tds[5]
+#    return 1
 #四张表业绩信息    
 def deal_gsi():
     fdn = ['projectName', 'biddingPrice', 'biddingDate', 'sourcesUrl', 'architects', 'content', 'company_name', 'type', 'sources', 'announcementId', 'updateTime']
@@ -83,7 +83,7 @@ def deal_gsi():
     index = 0
     
     #****************************************************************************************
-    for item in db4.gs_invitationBid.find({}, {'detailHtml':0}):
+    for item in db5.gs_invitationBid.find({}, {'detailHtml':0}):
         line = dict(map(lambda k, v : (k,v), fdn, fdv))
         line['projectName'] = item['announcementName']
         line['biddingDate'] = Date_F(item['publishTime']) 
@@ -102,7 +102,7 @@ def deal_gsi():
     lsmd5 = {}
     ErrIndex = 0
     fdv[7] = '中标'
-    for item in db4.gs_bidCandidate.find(): #单位：元
+    for item in db5.gs_bidCandidate.find(): #单位：元
         line = dict(map(lambda k, v : (k,v), fdn, fdv))
         line['projectName'] = re.sub('中标公示', '', item['announcementName'].encode('utf8'))
         line['biddingDate'] = Date_F(item['publishTime']) 
@@ -115,7 +115,7 @@ def deal_gsi():
         index += 1
         st = re.findall('(?=<table id="_Sheet1")([\s\S]+?)(?<=<\/table>)', item['detailHtml'])
         if len(st)>0:
-            ErrIndex += 1 ^ readHtmlInfo(st[0], line)
+            ErrIndex += 1 ^ libB.readHtmlInfo(st[0], line)
         else: 
             ErrIndex += 1
         lsAll.append(line)
@@ -256,12 +256,15 @@ if __name__ == '__main__':
     con1 = MongoClient('localhost', 27017)
     con2 = MongoClient('192.168.3.45', 27017)
     con3 = MongoClient('171.221.173.154', 27017)
+    con4 = MongoClient('192.168.3.221', 27017)
     db1 = con1['middle']
     db2 = con2['constructionDB']
     db3 = con3['jianzhu3']
-    db4 = con1['jianzhu']
-    bidding = db1.bidding
-    write = db1.bidding
+    db5 = con1['jianzhu']
+    db4 = con4['jianzhu3']
+    
+    bidding = db1.bidding1
+    write = db1.bidding1
     companyInfo = db1.companyInfoNew
     
     deal_gsi()

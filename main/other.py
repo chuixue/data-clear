@@ -113,7 +113,7 @@ def deal():
     for item in db2.tb.find({}, {}):
         print item
     print db1.companyInfoNew2.find().count()    
-     #读取较详细数据
+    #读取较详细数据
 #    for item in db2.companyAchievement2.find():
 #        cpname = item['companyName'] 
 #        tp = { 'contactPhone':'', 'fax':'', 'address':'', 'postcode':'' }
@@ -151,22 +151,19 @@ def temp1():
     
     
 
-def temp():
+def addSpecialCompanyId():
     con1 = MongoClient('localhost', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
+    con4 = MongoClient('192.168.3.221', 27017)
     db1 = con1['middle']
-    db3 = con3['jianzhu3']
-    temp = {'company_name':1, 'id':1}
+    db4 = con4['jianzhu3']
     
-    write = db3.SpecialCondition
+    write = db4.SpecialCondition
     
-    lsCompany = {}
     lsUpdate = []
     index = 0
-    for item in db1.companyInfoNew.find({}).limit(1):lskey = dict((key, 0) for key in item if key not in temp)
-    for item in db1.companyInfoNew.find({}, lskey): lsCompany[item['company_name'].encode('utf8')] = item['id']
+    lsCompany = P.getCompanyId(db4.companyInfoNew)
     
-    for item in db3.SpecialCondition.find():
+    for item in db4.SpecialCondition.find():
         cpname = item['company_name'].encode('utf8')
         id = lsCompany[cpname] if cpname in lsCompany else 0 
         lsUpdate.append([{'company_name': item['company_name']}, {'$set':{'company_id':id}}])
@@ -175,7 +172,8 @@ def temp():
         write.update(b[0], b[1])
         index += 1
         if index % 5000 == 0: print index
-    print 'OK!'
+    print 'OK!' 
+
     
     
 if __name__ == '__main__':
@@ -184,7 +182,7 @@ if __name__ == '__main__':
 #    temp()
 #    selectCompanyPersonCount()
 #    addCompanyBidding()
-    temp1()
+    addSpecialCompanyId()
     
     
 
