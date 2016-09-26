@@ -15,6 +15,19 @@ import urllib
 
 def test():
     f=2
+    
+def haveNum(_s):
+    if (not _s) or _s.strip()=='': return False
+    st = set(_s)
+    num = dict([[str(i), 1] for i in range(0,10)])
+    for s in st:
+        if s in num: return True
+    return False   
+    
+def tp():
+    print a
+
+
 if __name__ == '__main__':
     print datetime.datetime.now()
     #    re.findall()
@@ -49,7 +62,49 @@ if __name__ == '__main__':
 #    ss = {'k3':4, 'k4':6}
 #    st+=ss
 #    print st
-    print urllib.quote("百度")
+#    print urllib.quote("百度")
+#    ccode = 'fsnjn'
+#    legal = None
+#    _lsn = [haveNum(ccode), haveNum(legal), 1] 
+#    _lsn1 = [haveNum(ccode), haveNum(legal), 1]; _lsn2 = [haveNum(ccode), haveNum(legal), 0]
+#    pc = [ccode, legal, ''][[i for i in range(len(_lsn)) if _lsn1[i]][0]]
+#    pl = [ccode, legal, ''][[i for i in range(len(_lsn)) if not _lsn2[i] and _lsn2[i]!=''][0]]
+#    print [i for i in range(len(_lsn)) if not _lsn2[i] and _lsl[i]!='']
+#    line = 'dda施工'.encode('utf8')
+#    print line[-6:] 
+#    if line[-6:]=='施工':
+#        print line[:-6]
+#    line = [['a', 1], ['b', 2]]
+#    ls ={}
+#    for li in line:
+#        ls[li[0]] = []
+#        l = li
+#        ls[li[0]].append(l)
+#    line = 2 
+#    print ls
+#    print datetime.date.today() - datetime.timedelta(days=1) 
+    s='2012-05-2'
+#    sp = s.split('-')
+##    print datetime.datetime(int(sp[0]), int(sp[1]), int(sp[2]))
+#    print P.strToDate(s)
+#    print P.dateToStr(P.strToDate(s))
+#    print P.strToDate(s)
+    ls = [P.dateToStr(P.strToDate(s) + datetime.timedelta(days=i)) for i in range(1, 5)]
+    ls += [P.dateToStr(P.strToDate(s) - datetime.timedelta(days=i)) for i in range(1, 5)]
+    for l in ls:
+        print l
+    
+#    a = 12
+#    tp()
+#    print a
+    
+
+#    print pc
+#    print pl
+#    print re.sub(str(None), '', str("sads"))
+    
+#    print [i for i in range(len(_lsn)) if _lsn[i]]    
+#    print code
 #    parse.quote('百度')
     
 #    con1 = MongoClient('localhost', 27017)

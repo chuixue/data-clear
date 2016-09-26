@@ -4,7 +4,6 @@ Created on Aug 29, 2016
 
 @author: Administrator
 '''
-import pymongo
 from pymongo import MongoClient
 import time
 import datetime

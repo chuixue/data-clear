@@ -58,7 +58,7 @@ def dealCompanyOut():
             line['companyBases']['enterpriseType'] = { ctype:1 }
             lsComp[cp] = line
         for line in lines:
-            '''-----------------新旧专业映射--------------------------------------'''
+            '''----------------------新旧专业映射--------------------------------------'''
             if line[0]!='工程施工': continue
             _tp = libC.cProfessionals
             if line[2] in _tp: line[2] = _tp[line[2]]
@@ -110,6 +110,10 @@ def dealCompany():
             line['companyBases']['enterpriseType'] = { ctype:1 }
             lsComp[cp] = line
         for line in lines:
+            '''--------------------------专业映射--------------------------------------'''
+            _tp = libC.cProfessionalsIn
+            if line[2] in _tp: line[2] = _tp[line[2]]
+            '''''''''''''''''''''''''''''''''''''''''''''''----------------------------'''
             lmd5 = ','.join(line)
             lsComp[cp]['qualification'][lmd5] = { 'type':line[0], 'class':line[1], 'professional':line[2], 
                                                   'level':line[3], 'code':line[4], 'validityDates':line[5] }
@@ -142,12 +146,13 @@ if __name__ == '__main__':
     db2 = con2['constructionDB']
     db3 = con3['jianzhu3']
     db4 = con4['jianzhu3']
-    write = db1.companyInfoNew1
-    companyInfo = db1.companyInfoNew1
-    
+    write = db1.companyInfoNew
+    companyInfo = db1.companyInfoNew
     
     dealCompany()
     dealCompanyOut()
+    
+    write.ensure_index('id')
 #    select()
     
     #*********************************************

@@ -17,6 +17,12 @@ def cout(ls):
 def out(ls):
     for l in ls: print l,
     print
+def haveNum(_s):
+    if (not _s) or _s.strip()=='': return False
+    st = set(_s)
+    num = dict([[str(i), 1] for i in range(0,10)])
+    for s in st:
+        if s in num: return True
 
 #将companyAchievement表业绩统一整理到业绩表   
 def addCompanyBidding():
@@ -174,7 +180,47 @@ def addSpecialCompanyId():
         if index % 5000 == 0: print index
     print 'OK!' 
 
+def temp():
+    con1 = MongoClient('localhost', 27017)
+    con2 = MongoClient('192.168.3.45', 27017)
+    con3 = MongoClient('171.221.173.154', 27017)
+    con4 = MongoClient('192.168.3.221', 27017)
+    con5 = MongoClient('101.204.243.241', 27017)
     
+    db1 = con1['middle']
+    db2 = con2['constructionDB']
+    db3 = con3['jianzhu3']
+    db4 = con4['jianzhu3']
+    db5 = con5['jianzhu3']
+    
+    lskey = P.dbKeys(db1.companyInfoNew, ['company_name', 'id', 'companyBases'])
+    for item in db5.companyInfoNew.find({}, lskey):
+        code = item['companyBases']['organizationCode'].strip() 
+        if not haveNum(code) and code!='': print '\t', code, item['companyBases']['legalRepresentative'], item['company_name']
+        if item['companyBases']['organizationCode']!='' or item['companyBases']['legalRepresentative']!='':
+            print item['companyBases']['organizationCode'], item['companyBases']['legalRepresentative']
+            
+            
+def tp():
+    con1 = MongoClient('localhost', 27017)
+    con2 = MongoClient('192.168.3.45', 27017)
+    con3 = MongoClient('171.221.173.154', 27017)
+    con4 = MongoClient('192.168.3.221', 27017)
+    con5 = MongoClient('101.204.243.241', 27017)
+    db1 = con1['middle']
+    db2 = con2['constructionDB']
+    db3 = con3['jianzhu3']
+    db4 = con4['jianzhu3']
+    db5 = con5['jianzhu3']
+    
+#    lskey = P.dbKeys(db1.companyInfoNew, ['company_name', 'id', 'companyBases'])
+    for item in db2.companyAchievement.find({}):
+        for ln in item['biddingDetail']:
+            pj = ln['projectName'][:-4].strip().encode('utf8')
+            print pj[-4:0]
+            if pj[:-2]=='施工':
+                print item['companyName']
+#            ln['projectName']
     
 if __name__ == '__main__':
     dt = datetime.datetime.now()
@@ -182,9 +228,9 @@ if __name__ == '__main__':
 #    temp()
 #    selectCompanyPersonCount()
 #    addCompanyBidding()
-    addSpecialCompanyId()
-    
-    
+#    addSpecialCompanyId()
+#    temp()
+    tp()
 
     #*********************************************
     print datetime.datetime.now(), datetime.datetime.now()-dt

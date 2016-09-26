@@ -9,6 +9,7 @@ import datetime
 import re
 import public as P
 import libPerson as libP
+import copy
 
 import sys
 #reload(sys)
@@ -65,9 +66,7 @@ def common_process(item, lsNames, personDic):
         personDic[personId]['certificate'][lmd5] = line
         personDic[personId]['companyname'][cpname] = 1
                
-def dealPerson():
-#        write1 = db1.personNew2
-#        self.writer = write1 
+def dealPerson(): 
     index = 0
     personDic = {}
     lsNames = {}
@@ -77,16 +76,16 @@ def dealPerson():
     #含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册建造师、注册电气工程师、注册建筑师、注册公用设备工程师、注册结构师
     for item in db2.personnelInPCopy.find():
         if 0 == common_process(item, lsNames, personDic):break
-#        calcPerson(personDic)
-#        return
+        #calcPerson(personDic)
+        #return
 
     #**************************************************************************************
     print 'deal jianzaoshi2_table..：personnelEnterPCopy'
     #含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册结构师、注册电气工程师、注册建筑师、注册公用设备工程师、注册建造师
     for item in db2.personnelEnterPCopy.find():
         if 0 == common_process(item, lsNames, personDic):break
-#        calcPerson(personDic)
-#        return        
+        #calcPerson(personDic)
+        #return        
 
     #**************************************************************************************
     print 'deal ankaozheng_table..'
@@ -98,8 +97,8 @@ def dealPerson():
         item['personId'] = 'idcard-'+ item['idCard'] if item['idCard'] != '' else item['certificateCode']  
         item['companyName'] = item['workUnits']
         if 0 == common_process(item, lsNames, personDic):break
-#        calcPerson(personDic)
-#        return
+        #calcPerson(personDic)
+        #return
 
     #**************************************************************************************
     print 'deal anquangongchengshi_table: safetyEngineer..'        
@@ -110,8 +109,8 @@ def dealPerson():
         item['location'] = "四川省" if item['companyType'] == "省内企业" else ""
         item['personId'] = 'safe-engineerCode'+ item['engineerCode']
         if 0 == common_process(item, lsNames, personDic):break
-#        calcPerson(personDic)
-#        return
+        #calcPerson(personDic)
+        #return
 
     #**************************************************************************************
     print 'deal zaojiashi_table: CERegistered..'        
@@ -122,8 +121,8 @@ def dealPerson():
         item['personId'] = 'ce-registeredNumb'+ item['registeredNumb']
         if item['certificateCode'].find('建[造]')!=0: item['certificateCode'] = item['certificateCode'].replace('建〔造〕', '建[造]')
         if 0 == common_process(item, lsNames, personDic):break
-#        calcPerson(personDic)
-#        return
+        #calcPerson(personDic)
+        #return
     
     #**************************************************************************************
     print 'deal anquangongchengshi_table..: WCEngineer'        
@@ -145,20 +144,23 @@ def dealPerson():
         if item['idCard']=='': item['personId'] = 'idcard-'+ item['qualificationCertNum']
         if item['type'].encode('utf8') in lsn: item['professional'] = '水利'       
         if 0 == common_process(item, lsNames, personDic):break
-#        calcPerson(personDic)
-#        return
+        #calcPerson(personDic)
+        #return
 
     '''''''''''''''''''''人名与公司名同归为一人·该部分可去掉'''''''''''''''''''''''''''''''''
     lsCpPs = {}
     for p in personDic:
         cps = personDic[p]['companyname'].keys()
-        cpname = '' if len(cps)==0 else cps[0].encode('utf8')
-        if cpname=='': lsCpPs[p] = personDic[p]; continue
-        key = cpname + '_'+ personDic[p]['name']
-        if key not in lsCpPs: 
-            lsCpPs[key] = personDic[p]
-        else: 
-            lsCpPs[key]['certificate'] = dict(personDic[p]['certificate'], **lsCpPs[key]['certificate'])
+        if len(cps)==0: cps = {'':1}        
+        for cp in cps:
+            cpname = cp.encode('utf8')
+            personDic[p]['company_name'] = cpname
+            if cpname=='': lsCpPs[p] = personDic[p]; continue
+            key = cpname + '_'+ personDic[p]['name'].encode('utf8')
+            if key not in lsCpPs: 
+                lsCpPs[key] = copy.deepcopy(personDic[p]) if len(cps)>1 else personDic[p] 
+            else: 
+                lsCpPs[key]['certificate'] = dict(personDic[p]['certificate'], **lsCpPs[key]['certificate'])
     print len(lsCpPs), 'combine from', len(personDic)    
     personDic = lsCpPs
     ''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -168,8 +170,9 @@ def dealPerson():
     index = 50000000
     for p in personDic:
         cps = personDic[p]['companyname'].keys()
-        cpname = '' if len(cps)==0 else cps[0].encode('utf8')
-        personDic[p]['companyname'] = cpname 
+        #cpname = '' if len(cps)==0 else cps[0].encode('utf8')
+        cpname = personDic[p]['company_name']
+        personDic[p]['companyname'] = cpname
         ls = personDic[p]['certificate'].values()
         personDic[p]['certificate'] = []
         for c in ls: 
@@ -191,18 +194,20 @@ if __name__ == '__main__':
     #*********************************************
     con1 = MongoClient('localhost', 27017)
     con2 = MongoClient('192.168.3.45', 27017)
-    con3 = MongoClient('171.221.173.154', 27017)
+#    con3 = MongoClient('171.221.173.154', 27017)
     con4 = MongoClient('192.168.3.221', 27017)
     db1 = con1['middle']
     db2 = con2['constructionDB']
-    db3 = con3['jianzhu3']
+#    db3 = con3['jianzhu3']
     db4 = con4['jianzhu3']
-    write = db1.personNew1
+    write = db1.personNew
     companyInfo = db1.companyInfoNew
     
-    dealPerson()
     
-    
+#    dealPerson()
+
+    write.ensure_index('id')
+    write.ensure_index('company_id')
     
     #*********************************************
     print datetime.datetime.now(), datetime.datetime.now()-dt

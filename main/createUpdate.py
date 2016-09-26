@@ -48,9 +48,10 @@ def updateNewCourt():
         item['companyName'] = cpname
         item['caseDate'] = Date_F(item['caseCreateTime'])
         item['courtName'] = item['execCourtName']
-        keys = ["caseCode", "caseDate", "courtName", "companyName", "execMoney", "companyType"]
+        keys = ["caseCode", "caseDate", "courtName", "companyName", "execMoney", "companyType", "id"]
         ktps = ["original_message", "content_url", "caseName", "caseType", "judicial_procedure"]
         line = dict((k, item[k]) for k in keys)
+        line['sources'] = '全国法院执行网' 
         for k in ktps: line[k] = ""  
         lsCourt[cpname][code] = line
         
@@ -66,8 +67,9 @@ def updateNewCourt():
         lsTemp[code] = 1
         for c in [['caseCode', 'case_number'], ['caseDate', 'judge_date'], ['caseName', 'case_name'], ['courtName', 'court_name'], ['content_url', 'doc_content_url'], ['caseType', 'case_type']]:item[c[0]] = item[c[1]]
         keys = ["caseCode", "caseDate", "companyName", "courtName", 'caseName', "original_message", "content_url", "caseType", "judicial_procedure"]
-        ktps = ["execMoney", "companyType"]
+        ktps = ["execMoney", "companyType", 'id']
         line = dict((k, item[k]) for k in keys)
+        line['sources'] = '中国裁判文书网'
         for k in ktps: line[k] = ""  
         '''---------------------------------去掉臃肿字段'''
         line['original_message'] = ""   
@@ -153,7 +155,17 @@ def updateCompanyBase():
     index = 0
     lsAch = {}
     lsUpdate = []
+    lsBase = {}
     lskey = P.dbKeys(companyInfo, ['company_name', 'id', 'companyBases'])
+    print 'read the company base information...'
+    for item in db2.EInProvenceDetail.find({}, lskey):
+        if 'companyBases' not in item: continue
+        cpname = item['companyName'].encode('utf8')
+        lsBase[cpname] = [item['companyBases'][0]['organizationCode'], item['companyBases'][0]['legalRepresentative']]
+    for item in db2.EOutProvenceDetail.find({}, lskey):
+        if 'companyBases' not in item: continue
+        cpname = item['companyName'].encode('utf8')
+        lsBase[cpname] = [item['companyBases'][0]['organizationCode'], item['companyBases'][0]['legalRepresentative']]
     print 'read the source table...'
     for item in db2.companyAchievement.find():
         line = dict((k, '') for k in ['contactPhone', 'fax', 'address', 'postcode' ])
@@ -162,22 +174,28 @@ def updateCompanyBase():
         line['profile'] = item['companyProfile'][0]['profile'] if len(item['companyProfile'])>0 else ''
         line['profile'] = line['profile'].encode('utf8')[16:].strip() 
         lsAch[item['companyName'].encode('utf8')] = line
-        
+    
     print 'read the companyInfoNew...'
     for item in companyInfo.find({}, lskey):
         cpname = item['company_name'].encode('utf8')
         line = dict((k, '') for k in ['contactPhone', 'fax', 'address', 'postcode', 'profile'])
         if cpname in lsAch: line = lsAch[cpname]; 
         if cpname not in lsAch: line['profile'] = '暂无信息'
-        line['organizationCode'] = item['companyBases']['organizationCode'] if 'organizationCode' in item['companyBases'] else ''
-        line['legalRepresentative'] = item['companyBases']['legalRepresentative'] if 'legalRepresentative' in item['companyBases'] else ''
-        ccode = line['organizationCode']
-        if not haveNum(ccode):
-            line['organizationCode'] = line['legalRepresentative'] 
-            line['legalRepresentative'] = ccode
-        st = dict(('companyBases.'+k, line[k]) for k in line)
+        line['organizationCode'] =  lsBase[cpname][0] if cpname in lsBase else ''        
+        line['legalRepresentative'] = lsBase[cpname][1] if cpname in lsBase else ''
+        ccode = re.sub(str(None), '', str(line['organizationCode']).strip())
+        legal = re.sub(str(None), '', str(line['legalRepresentative']).strip())
+        
+        _lsn1 = [haveNum(ccode), haveNum(legal), 1]; _lsn2 = [haveNum(ccode), haveNum(legal), 0]  
+        line['organizationCode'] = [ccode, legal, ''][[i for i in range(3) if _lsn1[i]][0]]
+        line['legalRepresentative'] = [ccode, legal, ''][[i for i in range(3) if not _lsn2[i] and _lsn2[i]!=''][0]]
+        if cpname=='四川佳和建设工程有限公司':
+            print line['organizationCode'], ',' , line['legalRepresentative']
+            print ccode, ',', legal  
+        st = dict(('companyBases.'+k, line[k]) for k in line) 
         lsUpdate.append([{'id':item['id']}, {'$set':st}])
     print 'update all the companyInfoNew...'
+    
     for d in lsUpdate:
         if index % 5000 ==0: print index, d[0]
         write.update(d[0], d[1])
@@ -192,12 +210,16 @@ if __name__ == '__main__':
     con2 = MongoClient('192.168.3.45', 27017)
     con3 = MongoClient('171.221.173.154', 27017)
     con4 = MongoClient('192.168.3.221', 27017)
+    con5 = MongoClient('101.204.243.241', 27017)
+    
     db1 = con1['middle']
     db2 = con2['constructionDB']
     db3 = con3['jianzhu3']
     db4 = con4['jianzhu3']
-    companyInfo = db4.companyInfoNew
-    write = db4.companyInfoNew
+    db5 = con5['jianzhu3']
+    
+    companyInfo = db1.companyInfoNew
+    write = db1.companyInfoNew
 
     updateCompanyBase()
     updateGoodRecord()
