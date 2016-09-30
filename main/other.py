@@ -153,7 +153,8 @@ def temp1():
     db1 = con1['middle']
     db2 = con2['constructionDB']
     db3 = con3['jianzhu3']
-    
+    st = ""
+    ""
     
     
 

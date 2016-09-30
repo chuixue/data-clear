@@ -5,7 +5,8 @@ Created on Sep 19, 2016
 @author: Administrator
 '''
 import re
-
+import datetime
+import public as P
 
 def cout(ls):
     for l in ls: print l, ':', ls[l],
@@ -13,12 +14,6 @@ def cout(ls):
 def out(ls):
     for l in ls: print l,
     print
-def Date_F(str):
-#    str = str.decode('utf8')
-    if not str or str == '': return ''
-    if not (str.find("年")>0 and str.find("月")>0): return str
-    sp = re.split("年|月".decode('utf8'), str)
-    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
 cBase = {'建筑业': ['专业承包', '总承包', '劳务分包', '专项资质', '施工劳务'],
              '工程勘察': ['专业资质', '综合资质', '劳务资质'], 
@@ -59,6 +54,13 @@ cProfessionalsIn = {
 
 def findp(ctype, line): return [p for p in cBase[ctype] if line.find(p)!=-1]
 
+def initLine(item):
+    line = { 'label':0, 'other':'', 'company_qualification':'', 'companyachievement':[], 
+                    'badbehaviors':{"creditScore": 100, "badBehaviorDetails": [] }, 'goodbehaviors':[],  
+                    'courtRecords':[], 'bidding':[], 'operationDetail':[],'courtRecords':[], 'honors':[],
+                     'certificate':[], 'qualification':{}, 'updateTime':datetime.datetime.now(), 
+                    'company_id':item['entId'], 'companyBases':item['companyBases'][0], 'company_name':item['companyName'] }
+    return line
 
 #处理入川情况
 def getLinesOut(item):
@@ -70,7 +72,7 @@ def getLinesOut(item):
         lv = c['qc_level'].encode('utf8') if c['qc_level'] else ''
         if c['qc_qualification']==None or c['qc_qualification'].strip()=='':     #不需要解析专业级别信息
             if lv=='(暂定)' or lv=='暂定级(暂定)' or lv=='': lv = '暂定级'
-            row = [ctype, '', '', lv, c['qc_code'], Date_F(c['qc_validityDate'])]
+            row = [ctype, '', '', lv, c['qc_code'], P.Date_F(c['qc_validityDate'])]
             if ctype in cMaps:    #特定类别及专业 
                 row[2] = row[1] = cMaps[ctype]         
             if row[3].find('、')!=-1: row[3] = row[3].split('、')[0]   #仅一条
@@ -91,7 +93,7 @@ def getLinesOut(item):
                 stp = re.split('|'.join(cBase[ctype]), line.encode('utf8'))
                 p = findp(ctype, line)       #大类，分类，专业，级别, 证书，有效期
                 if ctype=='工程监理' and len(p)==0: p=['专业资质']
-                row = [ctype, p[0], '', '', c['qc_code'], Date_F(c['qc_validityDate'])]
+                row = [ctype, p[0], '', '', c['qc_code'], P.Date_F(c['qc_validityDate'])]
                 if ctype in cMaps:  #制定类别及专业
                     if len(stp)==2:
                         row[1] = row[2] = cMaps[ctype]
@@ -157,7 +159,7 @@ def getLines(item):
         lv = c['qc_level'].encode('utf8') if c['qc_level'] else ''
         if c['qc_qualification']==None:     #不需要解析专业级别信息
             if lv=='(暂定)' or lv=='暂定级(暂定)' or lv=='': lv = '暂定级'
-            row = [ctype, '', '', lv, c['qc_code'], Date_F(c['qc_validityDate'])]
+            row = [ctype, '', '', lv, c['qc_code'], P.Date_F(c['qc_validityDate'])]
             if ctype in cMaps:    #特定类别及专业 
                 row[2] = row[1] = cMaps[ctype]                 
             if row[3].find('、')!=-1: row[3] = row[3].split('、')[0]   #仅一条
@@ -169,7 +171,7 @@ def getLines(item):
                 stp = re.split('|'.join(cBase[ctype]), line.encode('utf8'))
                 p = findp(ctype, line)       #大类，分类，专业，级别, 证书，有效期
                 if p==[] or line.strip()=='': continue
-                row = [ctype, p[0], '', '', c['qc_code'], Date_F(c['qc_validityDate'])]
+                row = [ctype, p[0], '', '', c['qc_code'], P.Date_F(c['qc_validityDate'])]
                 if len(stp)==3: 
                     if stp[0]=='' and stp[1]=='':
                         if ctype=='工程监理': row[2] = '工程监理综合资质'

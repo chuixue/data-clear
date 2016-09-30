@@ -27,6 +27,9 @@ def haveNum(_s):
 def tp():
     print a
 
+def gtn():
+    line = {'id':1}
+    return line
 
 if __name__ == '__main__':
     print datetime.datetime.now()
@@ -83,22 +86,30 @@ if __name__ == '__main__':
 #    line = 2 
 #    print ls
 #    print datetime.date.today() - datetime.timedelta(days=1) 
-    s='2012-05-2'
+#    s='2012-05-2'
+    
 #    sp = s.split('-')
 ##    print datetime.datetime(int(sp[0]), int(sp[1]), int(sp[2]))
 #    print P.strToDate(s)
 #    print P.dateToStr(P.strToDate(s))
 #    print P.strToDate(s)
-    ls = [P.dateToStr(P.strToDate(s) + datetime.timedelta(days=i)) for i in range(1, 5)]
-    ls += [P.dateToStr(P.strToDate(s) - datetime.timedelta(days=i)) for i in range(1, 5)]
-    for l in ls:
-        print l
+#    ls = [P.dateToStr(P.strToDate(s) + datetime.timedelta(days=i)) for i in range(1, 5)]
+#    ls += [P.dateToStr(P.strToDate(s) - datetime.timedelta(days=i)) for i in range(1, 5)]
+#    for l in ls:
+#        print l
     
 #    a = 12
 #    tp()
 #    print a
+#    ls = []
+#    for i in range(5):
+#        ln =gtn()
+#        ls.append(ln)
+#    ls[0]['id'] = 32
+#    print ls
+    st = ("23"
+        "13"'23')
     
-
 #    print pc
 #    print pl
 #    print re.sub(str(None), '', str("sads"))

@@ -7,13 +7,14 @@ Created on Sep 19, 2016
 
 import datetime
 import re
+import public as P
 
-def Date_F(str):
-    str = str.decode('utf8')
-    if not str or str == '': return ''
-    if not (str.find("年")>0 and str.find("月")>0): return str.encode('utf8')
-    sp = re.split("年|月".decode('utf8'), str)
-    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
+#def Date_F(str):
+#    str = str.decode('utf8')
+#    if not str or str == '': return ''
+#    if not (str.find("年")>0 and str.find("月")>0): return str.encode('utf8')
+#    sp = re.split("年|月".decode('utf8'), str)
+#    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
 
 
 class Type(object):
@@ -101,7 +102,7 @@ def dealType(type, item):
             if p!='': p = '' if item['professional'] == '注册建造师' else tp[p] + '工程' 
             if item['staffLevel']=='建筑工程': item['staffLevel']=""    #解决部分数据错乱
             lv = '' if item['staffLevel']=="" else item['staffLevel'].split('级')[0] + '级'
-            line = ['注册建造师', p, lv, item['certificateCode'], Date_F(item['validityDate'])]
+            line = ['注册建造师', p, lv, item['certificateCode'], P.Date_F(item['validityDate'])]
             lines.append(line)
     elif type == 'ak':
         code = item['certificateCode']
@@ -170,26 +171,26 @@ def dealType(type, item):
             tp = '其他安全'
         if tp.find('危险物品安全')>=0: tp = '危险物品安全'
         if tp.encode('utf8') not in temp: return []
-        line = ['注册安全工程师', tp, lv, item['engineerCode'], Date_F(item['validityDate'])]
+        line = ['注册安全工程师', tp, lv, item['engineerCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'jzs':
         lv = item['staffLevel'].split('级')[0] + '级'
-        line = ['注册建筑师', '', lv, item['certificateCode'], Date_F(item['validityDate'])]
+        line = ['注册建筑师', '', lv, item['certificateCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'jl':
         pass
     elif type == 'kc':
         names = ['注册化工工程师', '注册土木工程师', '注册电气工程师', '注册公用设备工程师']
         if item['staffLevel'] not in names: return []
-        line = [item['staffLevel'], '', '', item['certificateCode'], Date_F(item['validityDate'])]
+        line = [item['staffLevel'], '', '', item['certificateCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'jg':
         lv = item['staffLevel'].split('级')[0] + '级'
-        line = ['注册结构师', '', lv, item['certificateCode'], Date_F(item['validityDate'])]
+        line = ['注册结构师', '', lv, item['certificateCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'zyjs':
         return []   
-        line = [item['post'], item['professional'], '', item['certificateCode'], Date_F(item['validityDate'])]
+        line = [item['post'], item['professional'], '', item['certificateCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     return lines 
 
