@@ -15,7 +15,9 @@ import public as P
 #    if not (str.find("年")>0 and str.find("月")>0): return str.encode('utf8')
 #    sp = re.split("年|月".decode('utf8'), str)
 #    return (sp[0] + '-' + sp[1] + '-' + sp[2].replace('日', '')).encode('utf8')
-
+def out(ls):
+    for l in ls: print l,
+    print
 
 class Type(object):
     def __init__(self):self.index = 0
@@ -138,7 +140,7 @@ def dealType(type, item):
             if '交'==code[0:1] and len(splv)==8 and splv[2] in lslv: lv = splv[2]
             if '水'==code[0:1] and len(splv)==3 and splv[1][0:1] in lslv: lv = splv[1][0:1]
         lv = "" if lv not in lslv else lslv[lv]+'级'
-        line = ['安考证', p[0]+'安', lv, code.encode('utf8'), Date_F(item['validityDate'])]
+        line = ['安考证', p[0]+'安', lv, code.encode('utf8'), P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'zj':
         tp = {'建':'土建', '水':'水利', '交公':'公路', '水利':'水利'}
@@ -164,13 +166,14 @@ def dealType(type, item):
         temp = { '其他安全':'', '危险物品安全':'', '煤矿安全':'', '非煤矿矿山安全':'', '建筑施工安全':''}
         tp = item['registeredType']
         lv = ""
-        if tp.find('其他安全')>=0:
+        if tp.find('其他安全')>=0: 
             lv = re.split('\(|\)', tp)[1].encode('utf8')
-            lvs = ['农业','水利','电力','消防','交通','其他']
-            if lv not in dict([[l, 1] for l in lvs]): lv = '其他'
             tp = '其他安全'
-        if tp.find('危险物品安全')>=0: tp = '危险物品安全'
+        if tp.find('危险物品安全')>=0: 
+            lv = re.split('\(|\)', tp)[1].encode('utf8')
+            tp = '危险物品安全'
         if tp.encode('utf8') not in temp: return []
+
         line = ['注册安全工程师', tp, lv, item['engineerCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'jzs':
@@ -181,8 +184,12 @@ def dealType(type, item):
         pass
     elif type == 'kc':
         names = ['注册化工工程师', '注册土木工程师', '注册电气工程师', '注册公用设备工程师']
+        tp = {"AY":"岩土", "DF":"供配电", "DG":"发输变电","CS":"给排水","CN":"暖通工程", "CD":"动力"}
+        ps = [tp[t] for t in tp if item['certificateCode'].find(t)!=-1]
+        p = '' if len(ps)<1 else ps[0]
+        if p=='' and item['certificateCode'][0:1]!='F': print item['certificateCode'], item['name'], item['detailUrl']
         if item['staffLevel'] not in names: return []
-        line = [item['staffLevel'], '', '', item['certificateCode'], P.Date_F(item['validityDate'])]
+        line = [item['staffLevel'], p, '', item['certificateCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'jg':
         lv = item['staffLevel'].split('级')[0] + '级'

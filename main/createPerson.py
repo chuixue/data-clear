@@ -6,10 +6,10 @@ Created on Sep 14, 2016
 '''
 from pymongo import MongoClient
 import datetime
-import re
 import public as P
 import libPerson as libP
 import copy
+import config as CFG
 
 import sys
 #reload(sys)
@@ -76,18 +76,22 @@ def common_process(item, personDic):
 '''''''''''''''''''''
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 class ReadPerson(object):
-    def __init__(self, _cfg):
+    def __init__(self, cfg):
         self.personDic = {}
-        self.cfg = _cfg
+        self.cfg = cfg
         self.db = self.cfg.dbPerson
+    def log(self): print '--', len(self.personDic), 'Records collect.'
+    
     def read_personnelInPCopy(self):
         for item in self.db.personnelInPCopy.find():
             if 0 == common_process(item, self.personDic):break
+        self.log()
     
     def read_personnelEnterPCopy(self):
         for item in self.db.personnelEnterPCopy.find():
             if 0 == common_process(item, self.personDic):break
-            
+        self.log()
+         
     def read_WCSafetyEngineer(self):
         for item in self.db.WCSafetyEngineer.find():
             item['name'] = item['engineerName']
@@ -96,7 +100,8 @@ class ReadPerson(object):
             item['personId'] = 'idcard-'+ item['idCard'] if item['idCard'] != '' else item['certificateCode']  
             item['companyName'] = item['workUnits']
             if 0 == common_process(item, self.personDic):break
-            
+        self.log()
+        
     def read_safetyEngineer(self):
         common = [['engineerName', 'name'], ['engineerCode', 'certificateCode'], ['workUnits', 'companyName']]        
         for item in self.db.safetyEngineer.find():
@@ -104,6 +109,7 @@ class ReadPerson(object):
             item['location'] = "四川省" if item['companyType'] == "省内企业" else ""
             item['personId'] = 'safe-engineerCode'+ item['engineerCode']
             if 0 == common_process(item, self.personDic):break
+        self.log()
             
     def read_CERegistered(self):
         common = [['engineerName', 'name'], ['registeredNumb', 'certificateCode'], ['registeredCompany', 'companyName'], ['validDate', 'validityDate'], ['registeredAgencies', 'location']]
@@ -112,7 +118,8 @@ class ReadPerson(object):
             item['personId'] = 'ce-registeredNumb'+ item['registeredNumb']
             if item['certificateCode'].find('建[造]')!=0: item['certificateCode'] = item['certificateCode'].replace('建〔造〕', '建[造]')
             if 0 == common_process(item, self.personDic):break
-
+        self.log()
+        
     def read_WCEngineer(self):
         common = [['qualificationCertNum', 'certificateCode'], ['workingCompany', 'companyName'], ['personType', 'type']]
         lsclr = ['validityDate', 'professional', 'location', 'staffLevel']        
@@ -131,7 +138,8 @@ class ReadPerson(object):
             if item['idCard']=='': item['personId'] = 'idcard-'+ item['qualificationCertNum']
             if item['type'].encode('utf8') in lsn: item['professional'] = '水利'       
             if 0 == common_process(item, self.personDic):break
-
+        self.log()
+        
 '''''''''''''''''''''''''''''''''''''''Class End'''''''''''''''''''''''''''''''''''''''''''''
 '''合并同公司同姓名人员'''
 def combinePersonByNameAndCompanyname(personDic):
@@ -152,7 +160,7 @@ def combinePersonByNameAndCompanyname(personDic):
     return lsCpPs
 
 '''写入数据库'''
-def writePerson(personDic):
+def writePerson(cfg, personDic):
     lsCompany = P.getCompanyId(cfg.companyInfo)
     index = 50000000
     for p in personDic:
@@ -171,10 +179,10 @@ def writePerson(personDic):
         personDic[p]['other'] = ''
         personDic[p]['updateTime'] = datetime.datetime.now()
     print len(personDic)
-    cfg.write.insert(personDic.values())
+    cfg.writePerson.insert(personDic.values())
     
-def dealPerson(): 
-    rp = ReadPerson()
+def readPerson(cfg): 
+    rp = ReadPerson(cfg)
     
     print 'read and deal table：personnelInPCopy'
     rp.read_personnelInPCopy()
@@ -197,64 +205,45 @@ def dealPerson():
     '''''''''''''''''''''人名与公司名同归为一人·该部分可去掉'''''''''''''''''''''''''''''''''
     personDic = combinePersonByNameAndCompanyname(rp.personDic)
     ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    writePerson(personDic)
-    return 
+    return personDic
 
-class Config(object):
-    def __init__(self):
-        con1 = MongoClient('192.168.3.120', 27017)
-        con2 = MongoClient('192.168.3.45', 27017)
-        con3 = MongoClient('101.204.243.241', 27017)
-        con4 = MongoClient('192.168.3.221', 27017)
-        db1 = con1['jianzhu3']
-        db2 = con2['constructionDB']
-        db3 = con3['jianzhu3']
-        db4 = con4['jianzhu3']
-        self.connect = [con1, con2, con3, con4]
-        self.companyInfo = db1.companyInfoNew
-        self.write = db1.personNew
-        self.dbPerson = db2
+#class Config(object):
+#    def __init__(self):
+#        con1 = MongoClient('192.168.3.119', 27017)
+#        con2 = MongoClient('192.168.3.45', 27017)
+#        con3 = MongoClient('101.204.243.241', 27017)
+#        con4 = MongoClient('192.168.3.221', 27017)
+#        db1 = con1['middle']
+#        db2 = con2['constructionDB']
+#        db3 = con3['jianzhu3']
+#        db4 = con4['jianzhu3']
+#        self.connect = [con1, con2, con3, con4]
+#        self.companyInfo = db1.companyInfoNew
+#        self.writePerson = db1.personNew
+#        self.dbPerson = db2
         
     def __del__(self):  
-        for con in self.connect.connect: con.disconnect()
+        for con in self.connect: con.disconnect()
         exit()
 
 if __name__ == '__main__':
     print 'Hello '
     dt = datetime.datetime.now()
     #*********************************************
-    cfg = Config()
+    _cfg = CFG.Config()
     
+#    rp = ReadPerson(_cfg)
+##    rp.read_personnelInPCopy()
+##    rp.read_personnelEnterPCopy()
+#    rp.read_safetyEngineer()
+#    calcPerson(rp.personDic)
     
-#    con1 = MongoClient('localhost', 27017)
-#    con2 = MongoClient('192.168.3.45', 27017)
-##    con3 = MongoClient('171.221.173.154', 27017)
-#    con4 = MongoClient('192.168.3.221', 27017)
-#    db1 = con1['middle']
-#    db2 = con2['constructionDB']
-##    db3 = con3['jianzhu3']
-#    db4 = con4['jianzhu3']
-#    write = db1.personNew
-#    companyInfo = db1.companyInfoNew
-#    
+    writePerson(_cfg, readPerson(_cfg))
+#    _cfg.write.ensure_index('id')
+#    _cfg.write.ensure_index('company_id')
     
-#    dealPerson()
-    
-    write.ensure_index('id')
-    write.ensure_index('company_id')
+  
     
     #*********************************************
     print datetime.datetime.now(), datetime.datetime.now()-dt
     print 'End !'
-    exit
-    
-
-
-#md.dealPerson()
-#select()
-
-#md.company_process()
-#md.company_certificate()
-#md.person_deal()
-#print Date_F('2012年02月23日')
-#print Date_F('2012-02-03')

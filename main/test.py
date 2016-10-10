@@ -118,10 +118,50 @@ if __name__ == '__main__':
 #    print code
 #    parse.quote('百度')
     
+#    ls = [{"s":2}, {"f":3}, {"w":21}]
+#    ll = []
+#    for l in ls:
+#        ll.append(l)
+#    ls.remove({"f":3})
+#    ls[0]['s'] = 18
+#    print ls
+#    print ll
+#    ls = []
+#    print ll
 #    con1 = MongoClient('localhost', 27017)
 #    con2 = MongoClient('192.168.3.45', 27017)
 #    con3 = MongoClient('171.221.173.154', 27017)
-#    db1 = con1['middle']
+    con1 = MongoClient('192.168.3.119', 27017)
+    db1 = con1['middle']
+    tb = db1.tbtest
+    lines = [{'cpname':'公司1', 'proj':'项目1', 'type':'中标'},
+             {'cpname':'公司1', 'proj':'项目2', 'type':'中标'},
+             {'cpname':'公司1', 'proj':'项目3', 'type':'中标'},
+             {'cpname':'公司2', 'proj':'项目4', 'type':'中标'},
+             {'cpname':'', 'proj':'项目5'},
+             {'cpname':'', 'proj':'项目1'},
+             {'cpname':'', 'proj':'项目6'},
+             ]
+    tb.insert(lines)
+    
+    for line in tb.find({}):
+        print line['cpname']
+#    reducer = """
+#                   function(obj, prev){
+#                       prev.count++;
+#                   }
+#            """
+
+#    results = tb.group(key={"cpname":1}, condition={'type':'中标', '':{'$':''}}, initial={"count": 0}, reduce=reducer)
+#
+#    for s in results:
+#        print s['cpname'], s['count']
+#    for line in tb.find():
+#        print line
+#    {'cpname':{'$gt':''}}        
+#              
+#              
+              
 #    db2 = con2['constructionDB']
 #    db3 = con3['jianzhu3']
 #    index = 0

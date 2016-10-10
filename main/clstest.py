@@ -4,13 +4,10 @@ Created on Sep 29, 2016
 @author: Administrator
 '''
 
-class Config(object):
+
+def func():
+    print 'run func'
     
-    def __init__(self):
-        pass
-    
-    def __del__(self):  
-        print 'OK'
-        pass
-    
-mc = Config()
+if __name__ == '__main__':
+    print 'Hello '
+

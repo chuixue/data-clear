@@ -57,7 +57,7 @@ def findp(ctype, line): return [p for p in cBase[ctype] if line.find(p)!=-1]
 def initLine(item):
     line = { 'label':0, 'other':'', 'company_qualification':'', 'companyachievement':[], 
                     'badbehaviors':{"creditScore": 100, "badBehaviorDetails": [] }, 'goodbehaviors':[],  
-                    'courtRecords':[], 'bidding':[], 'operationDetail':[],'courtRecords':[], 'honors':[],
+                    'courtRecords':[], 'biddingCount':0, 'operationDetail':[],'courtRecords':[], 'honors':[],
                      'certificate':[], 'qualification':{}, 'updateTime':datetime.datetime.now(), 
                     'company_id':item['entId'], 'companyBases':item['companyBases'][0], 'company_name':item['companyName'] }
     return line

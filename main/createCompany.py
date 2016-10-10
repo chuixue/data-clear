@@ -4,13 +4,12 @@ Created on Sep 14, 2016
 
 @author: Administrator
 '''
-import pymongo
 from pymongo import MongoClient
-import time
 import datetime
 import re
 import public as P
 import libCompany as libC
+import config as CFG
 
 def cout(ls):
     for l in ls: print l, ':', ls[l],
@@ -58,7 +57,7 @@ def writeCompanyOut(cfg, lsComp):
         index += 1
         dt.append(lsComp[comp])
     print 'write into table', len(lsComp), '...'
-    cfg.write.insert(dt)   
+    cfg.writeCompany.insert(dt)
     print 'complete!'
     
 def readCompanyIn(cfg):
@@ -100,38 +99,38 @@ def writeCompanyIn(cfg, lsComp):
         index += 1
         dt.append(lsComp[comp])
     print 'write', len(lsComp), 'records'
-    cfg.write.insert(dt)
+    cfg.writeCompany.insert(dt)
     
     
-class Config(object):
-    def __init__(self):
-        con1 = MongoClient('192.168.3.119', 27017)
-        con2 = MongoClient('192.168.3.45', 27017)
-        con3 = MongoClient('101.204.243.241', 27017)
-        con4 = MongoClient('192.168.3.221', 27017)
-        db1 = con1['middle']
-        db2 = con2['constructionDB']
-        db3 = con3['jianzhu3']
-        db4 = con4['jianzhu3']
-        self.connect = [con1, con2, con3, con4]
-        self.tbProvenceIn = db2.EInProvenceDetail
-        self.tbProvenceOut = db2.EOutProvenceDetail
-        self.companyInfo = db1.companyInfoNew
-        self.write = db1.companyInfoNew
-    def __del__(self):  
-        for con in self.connect.connect: con.disconnect()
-        exit()
+#class Config(object):
+#    def __init__(self):
+#        con1 = MongoClient('192.168.3.119', 27017)
+#        con2 = MongoClient('192.168.3.45', 27017)
+#        con3 = MongoClient('101.204.243.241', 27017)
+#        con4 = MongoClient('192.168.3.221', 27017)
+#        db1 = con1['middle']
+#        db2 = con2['constructionDB']
+#        db3 = con3['jianzhu3']
+#        db4 = con4['jianzhu3']
+#        self.connect = [con1, con2, con3, con4]
+#        self.tbProvenceIn = db2.EInProvenceDetail
+#        self.tbProvenceOut = db2.EOutProvenceDetail
+#        self.companyInfo = db1.companyInfoNew
+#        self.writeCompany = db1.companyInfoNew
+#    def __del__(self):  
+##        for con in self.connect.connect: con.disconnect()
+#        pass
 
 if __name__ == '__main__':
     print 'Hello '
     dt = datetime.datetime.now()
     #*********************************************
-    _cfg = Config()
+    _cfg = CFG.Config()
     
     writeCompanyIn(_cfg, readCompanyIn(_cfg))
     writeCompanyOut(_cfg, readCompanyOut(_cfg))
-        
-    _cfg.write.create_index('id')
+    
+    _cfg.writeCompany.create_index('id')
 
     
     #*********************************************

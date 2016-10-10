@@ -17,6 +17,11 @@ import sys
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 import traceback
+import clstest
+
+clstest.func()
+
+exit()
 
 class CReadData2ES(object):
 
@@ -185,9 +190,9 @@ class CReadData2ES(object):
             }
     
     
-    print item['name'], item['companyName']
-                print personDic[personId]['name'],
-                cout(personDic[personId]['companyname'])
+#    print item['name'], item['companyName']
+#                print personDic[personId]['name'],
+#                cout(personDic[personId]['companyname'])
     
     
     

@@ -49,7 +49,7 @@ def updateNewCourt():
         item['caseDate'] = Date_F(item['caseCreateTime'])
         item['courtName'] = item['execCourtName']
         keys = ["caseCode", "caseDate", "courtName", "companyName", "execMoney", "companyType", "id"]
-        ktps = ["original_message", "content_url", "caseName", "caseType", "judicial_procedure"]
+        ktps = ["original_message", "content_url", "caseName", "caseType", "judicial_procedure", "publish_date"]
         line = dict((k, item[k]) for k in keys)
         line['sources'] = '全国法院执行网' 
         for k in ktps: line[k] = ""  
@@ -58,15 +58,16 @@ def updateNewCourt():
     lsTemp = {}
     #************************************************************************************* 
     print 'read judgment table...'
-    for item in db2.judgment.find({}, {'doc_content':0}):
+    for item in db2.judgment.find({}, {'doc_content':0, 'original_message':0}):
         code = re.sub('）', ')', item['case_number'].encode('utf8'))
         code = re.sub('（', '(', code)
         cpname = item['companyName'].encode('utf8')
         if cpname not in lsCourt: lsCourt[cpname] = {}
         if code in lsTemp: continue 
         lsTemp[code] = 1
+        if 'publish_date' not in item: item['publish_date'] = ""
         for c in [['caseCode', 'case_number'], ['caseDate', 'judge_date'], ['caseName', 'case_name'], ['courtName', 'court_name'], ['content_url', 'doc_content_url'], ['caseType', 'case_type']]:item[c[0]] = item[c[1]]
-        keys = ["caseCode", "caseDate", "companyName", "courtName", 'caseName', "original_message", "content_url", "caseType", "judicial_procedure"]
+        keys = ["caseCode", "caseDate", "publish_date", "companyName", "courtName", 'caseName', "content_url", "caseType", "judicial_procedure"]
         ktps = ["execMoney", "companyType", 'id']
         line = dict((k, item[k]) for k in keys)
         line['sources'] = '中国裁判文书网'
@@ -92,7 +93,7 @@ def updateNewCourt():
     index = 0
     print 'update', len(lsUpdate), 'records...'
     for b in lsUpdate: 
-        write.update(b[0], b[1])
+        writeCompany.update(b[0], b[1])
         index += 1
         if index % 5000 == 0: print '\t',index
     print index, 'complete!'
@@ -117,7 +118,7 @@ def updateHonors():
         
     print 'update', len(lsUpdate), 'records...'
     for b in lsUpdate: 
-        write.update(b[0], b[1])
+        writeCompany.update(b[0], b[1])
         index += 1
         if index % 5000 == 0: print '\t',index, b[0]
     print index, 'complete!'
@@ -147,7 +148,7 @@ def updateGoodRecord():
     for d in lsUpdate:
         index += 1
         if index % 500 ==0: print d[0], index
-        write.update(d[0], d[1])
+        writeCompany.update(d[0], d[1])
     print '共更新公司总数：',index
 
 #给公司表添加公司其它基本信息
@@ -198,7 +199,7 @@ def updateCompanyBase():
     
     for d in lsUpdate:
         if index % 5000 ==0: print index, d[0]
-        write.update(d[0], d[1])
+        writeCompany.update(d[0], d[1])
         index += 1
     print 'complete', len(lsUpdate), 'records.'
 
@@ -206,7 +207,7 @@ def updateCompanyBase():
         
 if __name__ == '__main__':
     dt = datetime.datetime.now()
-    con1 = MongoClient('localhost', 27017)
+    con1 = MongoClient('192.168.3.119', 27017)
     con2 = MongoClient('192.168.3.45', 27017)
     con3 = MongoClient('171.221.173.154', 27017)
     con4 = MongoClient('192.168.3.221', 27017)
@@ -219,7 +220,7 @@ if __name__ == '__main__':
     db5 = con5['jianzhu3']
     
     companyInfo = db1.companyInfoNew
-    write = db1.companyInfoNew
+    writeCompany = db1.companyInfoNew
 
     updateCompanyBase()
     updateGoodRecord()
