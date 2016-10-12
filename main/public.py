@@ -34,6 +34,14 @@ def dateToStr(_date):
 def dateFormat(_str):
     return dateToStr(strToDate(_str)) 
 
+def haveNum(_s):
+    if (not _s) or _s.strip()=='': return False
+    st = set(_s)
+    num = dict([[str(i), 1] for i in range(0,10)])
+    for s in st:
+        if s in num: return True
+    return False
+
 def Date_F(str):
     if not str or str == '': return ''
     sp = []

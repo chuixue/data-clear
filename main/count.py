@@ -65,10 +65,9 @@ def select2():
     print '无资质公司', company.find({'qualificationType':[]}).count()    
 
 
-
 #输出公司表数据详情
 def selectCompany():
-    con1 = MongoClient('localhost', 27017)
+    con1 = MongoClient('192.168.3.119', 27017)
     db1 = con1['middle']
     lst = {}
     for item in db1.companyInfoNew.find():

@@ -10,7 +10,7 @@ import createPerson as CP
 import createBidding as CB
 import createIndex as CL
 import config as CFG
-
+import createUpdate as CU
         
 
 if __name__ == '__main__':
@@ -34,9 +34,20 @@ if __name__ == '__main__':
     CB.addBiddingFromcompanyAchievement(_cfg)
     CB.addCompanyBiddingCount(_cfg)
     
+    print 'update table information', _cfg.writePerson.name
+    CU.updateCompanyBase(_cfg)
+    CU.updateGoodRecord(_cfg)
+    CU.updateHonors(_cfg)
+    CU.updateNewCourt(_cfg)
+    
     print 'create indexs'
     CL.createIndexs(_cfg)
     CL.listIndexs(_cfg)
+    
+#    CL.addIdForSpecialCompany(_cfg)
+    
+    
+    
     
     #*********************************************
     print datetime.datetime.now(), datetime.datetime.now()-dt

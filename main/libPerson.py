@@ -184,7 +184,8 @@ def dealType(type, item):
         pass
     elif type == 'kc':
         names = ['注册化工工程师', '注册土木工程师', '注册电气工程师', '注册公用设备工程师']
-        tp = {"AY":"岩土", "DF":"供配电", "DG":"发输变电","CS":"给排水","CN":"暖通工程", "CD":"动力"}
+        tp = {"ＡＹ":"岩土", "ay":"岩土", "cn":"暖通空调", "AY":"岩土", "DF":"供配电", "DG":"发输变电","CS":"给水排水",
+              "GN":"暖通空调","SN":"暖通空调","CN":"暖通空调", "CD":"动力"}
         ps = [tp[t] for t in tp if item['certificateCode'].find(t)!=-1]
         p = '' if len(ps)<1 else ps[0]
         if p=='' and item['certificateCode'][0:1]!='F': print item['certificateCode'], item['name'], item['detailUrl']
@@ -193,7 +194,7 @@ def dealType(type, item):
         lines.append(line)
     elif type == 'jg':
         lv = item['staffLevel'].split('级')[0] + '级'
-        line = ['注册结构师', '', lv, item['certificateCode'], P.Date_F(item['validityDate'])]
+        line = ['注册结构工程师', '', lv, item['certificateCode'], P.Date_F(item['validityDate'])]
         lines.append(line)
     elif type == 'zyjs':
         return []   

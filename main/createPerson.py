@@ -61,9 +61,9 @@ def common_process(item, personDic):
 
 
 '''''''''''''''''''''
-    personnelInPCopy       含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册建造师、注册电气工程师、注册建筑师、注册公用设备工程师、注册结构师
+    personnelInPCopy       含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册建造工程师、注册电气工程师、注册建筑师、注册公用设备工程师、注册结构师
     
-    personnelEnterPCopy    含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册结构师、注册电气工程师、注册建筑师、注册公用设备工程师、注册建造师
+    personnelEnterPCopy    含注册土木工程师、安考证、造价工程师、注册化工工程师、造价员、注册结构工程师、注册电气工程师、注册建筑师、注册公用设备工程师、注册建造师
 
     WCSafetyEngineer       只有安考证
     
@@ -207,20 +207,6 @@ def readPerson(cfg):
     ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     return personDic
 
-#class Config(object):
-#    def __init__(self):
-#        con1 = MongoClient('192.168.3.119', 27017)
-#        con2 = MongoClient('192.168.3.45', 27017)
-#        con3 = MongoClient('101.204.243.241', 27017)
-#        con4 = MongoClient('192.168.3.221', 27017)
-#        db1 = con1['middle']
-#        db2 = con2['constructionDB']
-#        db3 = con3['jianzhu3']
-#        db4 = con4['jianzhu3']
-#        self.connect = [con1, con2, con3, con4]
-#        self.companyInfo = db1.companyInfoNew
-#        self.writePerson = db1.personNew
-#        self.dbPerson = db2
         
     def __del__(self):  
         for con in self.connect: con.disconnect()
@@ -233,14 +219,14 @@ if __name__ == '__main__':
     _cfg = CFG.Config()
     
 #    rp = ReadPerson(_cfg)
-##    rp.read_personnelInPCopy()
-##    rp.read_personnelEnterPCopy()
+#    rp.read_personnelInPCopy()
+#    rp.read_personnelEnterPCopy()
 #    rp.read_safetyEngineer()
 #    calcPerson(rp.personDic)
     
     writePerson(_cfg, readPerson(_cfg))
-#    _cfg.write.ensure_index('id')
-#    _cfg.write.ensure_index('company_id')
+    _cfg.write.ensure_index('id')
+    _cfg.write.ensure_index('company_id')
     
   
     

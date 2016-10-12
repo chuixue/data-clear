@@ -102,25 +102,7 @@ def writeCompanyIn(cfg, lsComp):
     cfg.writeCompany.insert(dt)
     
     
-#class Config(object):
-#    def __init__(self):
-#        con1 = MongoClient('192.168.3.119', 27017)
-#        con2 = MongoClient('192.168.3.45', 27017)
-#        con3 = MongoClient('101.204.243.241', 27017)
-#        con4 = MongoClient('192.168.3.221', 27017)
-#        db1 = con1['middle']
-#        db2 = con2['constructionDB']
-#        db3 = con3['jianzhu3']
-#        db4 = con4['jianzhu3']
-#        self.connect = [con1, con2, con3, con4]
-#        self.tbProvenceIn = db2.EInProvenceDetail
-#        self.tbProvenceOut = db2.EOutProvenceDetail
-#        self.companyInfo = db1.companyInfoNew
-#        self.writeCompany = db1.companyInfoNew
-#    def __del__(self):  
-##        for con in self.connect.connect: con.disconnect()
-#        pass
-
+    
 if __name__ == '__main__':
     print 'Hello '
     dt = datetime.datetime.now()

@@ -179,27 +179,20 @@ def temp1():
     print index, 'complete!'
     
 
-def addSpecialCompanyId():
-    con1 = MongoClient('localhost', 27017)
-    con4 = MongoClient('192.168.3.221', 27017)
-    db1 = con1['middle']
-    db4 = con4['jianzhu3']
-    
-    write = db4.SpecialCondition
-    
+def addIdForSpecialCompany(cfg):
     lsUpdate = []
     index = 0
-    lsCompany = P.getCompanyId(db4.companyInfoNew)
+    lsCompany = P.getCompanyId(cfg.dbNow.companyInfoNew)
     
-    for item in db4.SpecialCondition.find():
+    for item in cfg.dbNow.SpecialCondition.find():
         cpname = item['company_name'].encode('utf8')
         id = lsCompany[cpname] if cpname in lsCompany else 0 
         lsUpdate.append([{'company_name': item['company_name']}, {'$set':{'company_id':id}}])
     print 'update all the data,', len(lsUpdate)
     for b in lsUpdate: 
-        write.update(b[0], b[1])
+        cfg.dbNow.SpecialCondition.update(b[0], b[1])
         index += 1
-        if index % 5000 == 0: print index
+        if index % 2000 == 0: print index
     print 'OK!' 
 
 #def temp():
@@ -250,9 +243,9 @@ if __name__ == '__main__':
 #    temp()
 #    selectCompanyPersonCount()
 #    addCompanyBidding()
-#    addSpecialCompanyId()
+    addSpecialCompanyId()
 #    temp()
-    temp1()
+#    temp1()
 
     #*********************************************
     print datetime.datetime.now(), datetime.datetime.now()-dt
