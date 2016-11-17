@@ -143,10 +143,10 @@ def getLinesOut(item):
                             except:
                                 print c['qc_qualification']
                     row[3] = re.sub('资质|--请选择--| ', '', row[3])
-                    if row[3]=='': row[3] = c['qc_level'].encode('utf8')
-                    if ctype in { '建筑业':1, '园林绿化':1, '设计施工一体化':1 }: row[0] = '工程施工'
+                    if row[3]=='' and c['qc_level']!=None: row[3] = c['qc_level'].encode('utf8')
                     if ctype=='工程设计' and p[0]== '专业资质': row[1] = '行业资质'  #专业-》行业
-                    lines.append(row) 
+                if ctype in { '建筑业':1, '园林绿化':1, '设计施工一体化':1 }: row[0] = '工程施工'
+                lines.append(row) 
     return lines
 
 #资质处理核心过程
@@ -160,6 +160,11 @@ def getLines(item):
         if c['qc_qualification']==None:     #不需要解析专业级别信息
             if lv=='(暂定)' or lv=='暂定级(暂定)' or lv=='': lv = '暂定级'
             row = [ctype, '', '', lv, c['qc_code'], P.Date_F(c['qc_validityDate'])]
+            
+#            if ctype=="园林绿化":
+#                cout(c)
+                #out(row)
+            
             if ctype in cMaps:    #特定类别及专业 
                 row[2] = row[1] = cMaps[ctype]                 
             if row[3].find('、')!=-1: row[3] = row[3].split('、')[0]   #仅一条

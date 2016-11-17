@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//main/bidding.py=utf8
 encoding//main/company.py=utf8
 encoding//main/config.py=utf8
 encoding//main/count.py=utf8
@@ -15,3 +16,5 @@ encoding//main/main.py=gb18030
 encoding//main/mysqlTest.py=utf8
 encoding//main/other.py=utf8
 encoding//main/public.py=utf8
+encoding//main/serverEnd.py=utf8
+encoding//main/test.py=utf8

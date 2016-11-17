@@ -44,10 +44,8 @@ if __name__ == '__main__':
     CL.createIndexs(_cfg)
     CL.listIndexs(_cfg)
     
-#    CL.addIdForSpecialCompany(_cfg)
-    
-    
-    
+#   CL.addIdForSpecialCompany(_cfg)
+
     
     #*********************************************
     print datetime.datetime.now(), datetime.datetime.now()-dt

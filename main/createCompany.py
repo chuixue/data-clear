@@ -22,11 +22,17 @@ def out(ls):
 def readCompanyOut(cfg):
     print 'read company information out...'
     lsComp = {}
+    
+    index = 0
+    
     for item in cfg.tbProvenceOut.find():
         if 'companyName' not in item: continue
         cp = item['companyName']
         ctype = re.sub('入川', '', item['companyBases'][0]['enterpriseType'].encode('utf8'))
         lines = libC.getLinesOut(item)
+        
+        index+=len(lines)
+        
         if cp not in lsComp:
             line = libC.initLine(item)
             line['company_type'] = '入川'
@@ -42,6 +48,9 @@ def readCompanyOut(cfg):
             lsComp[cp]['qualification'][lmd5] = { 'type':line[0], 'class':line[1], 'professional':line[2], 
                                                   'level':line[3], 'code':line[4], 'validityDates':line[5] }
             lsComp[cp]['companyBases']['enterpriseType'][ctype] = 1
+    
+    print index
+    
     print 'read OK!'
     return lsComp
     
@@ -108,6 +117,11 @@ if __name__ == '__main__':
     dt = datetime.datetime.now()
     #*********************************************
     _cfg = CFG.Config()
+#    readCompanyOut(_cfg)
+#    
+#    exit()
+#    readCompanyOut(_cfg)
+    
     
     writeCompanyIn(_cfg, readCompanyIn(_cfg))
     writeCompanyOut(_cfg, readCompanyOut(_cfg))

@@ -8,7 +8,6 @@ class Config(object):
         con3 = MongoClient('101.204.243.241', 27017)
         con4 = MongoClient('192.168.3.221', 27017)
         db1 = con1['middle']
-        db1 = con1['jianzhu3']
         db2 = con2['constructionDB']
         db3 = con3['jianzhu3']
         db4 = con4['jianzhu3']

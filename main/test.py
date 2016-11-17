@@ -132,20 +132,22 @@ if __name__ == '__main__':
 #    con2 = MongoClient('192.168.3.45', 27017)
 #    con3 = MongoClient('171.221.173.154', 27017)
     con1 = MongoClient('192.168.3.119', 27017)
-    db1 = con1['middle']
-    tb = db1.tbtest
-    lines = [{'cpname':'公司1', 'proj':'项目1', 'type':'中标'},
-             {'cpname':'公司1', 'proj':'项目2', 'type':'中标'},
-             {'cpname':'公司1', 'proj':'项目3', 'type':'中标'},
-             {'cpname':'公司2', 'proj':'项目4', 'type':'中标'},
-             {'cpname':'', 'proj':'项目5'},
-             {'cpname':'', 'proj':'项目1'},
-             {'cpname':'', 'proj':'项目6'},
-             ]
-    tb.insert(lines)
+    db1 = con1['jianzhu3']
+    print db1['bidding'].find().count()
     
-    for line in tb.find({}):
-        print line['cpname']
+#    tb = db1.tbtest
+#    lines = [{'cpname':'公司1', 'proj':'项目1', 'type':'中标'},
+#             {'cpname':'公司1', 'proj':'项目2', 'type':'中标'},
+#             {'cpname':'公司1', 'proj':'项目3', 'type':'中标'},
+#             {'cpname':'公司2', 'proj':'项目4', 'type':'中标'},
+#             {'cpname':'', 'proj':'项目5'},
+#             {'cpname':'', 'proj':'项目1'},
+#             {'cpname':'', 'proj':'项目6'},
+#             ]
+#    tb.insert(lines)
+#    
+#    for line in tb.find({}):
+#        print line['cpname']
 #    reducer = """
 #                   function(obj, prev){
 #                       prev.count++;
