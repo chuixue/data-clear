@@ -10,7 +10,11 @@ import re
 from HTMLParser import HTMLParser
 #设置默认编码
 #type = sys.getfilesystemencoding()
- 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+
 class MyHTMLParser(HTMLParser):
     def __init__(self):
         self.reset()

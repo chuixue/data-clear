@@ -5,15 +5,20 @@ Created on Oct 21, 2016
 @author: Administrator
 '''
 import sys 
+
 sys.path.append('D:/ftp') 
 
+#import pymongo
 from pymongo import MongoClient
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 class Config(object):
     def __init__(self):
-        con1 = MongoClient('localhost', 27017)
+        con1 = MongoClient('101.204.243.241', 27017)
         db1 = con1['jianzhu3']
+        db1.authenticate("readWriteAny","abc@123","admin")
         self.companyInfo = db1.companyInfoNew
         self.dbNow = db1
         self.tbsIndex = [{'company':db1.companyInfoNew, 'person':db1.personNew, 'bidding':db1.bidding}]
@@ -55,7 +60,8 @@ def addIdForSpecialCompany(cfg):
     for tb in cfg.tbsSpecial:
         print 'deal table ', tb.name
         index = 0
-        for item in tb.find():
+        for item in tb.find({}):
+            if 'company_name' not in item: continue
             cpname = item['company_name'].encode('utf8')
             id = lsCompany[cpname] if cpname in lsCompany else 0 
             lsUpdate.append([{'company_name': item['company_name']}, {'$set':{'company_id':id}}])
@@ -85,4 +91,3 @@ if __name__ == '__main__':
     createIndexs(cfg)
     listIndexs(cfg)
     addIdForSpecialCompany(cfg)
-    

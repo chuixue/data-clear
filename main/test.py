@@ -12,6 +12,9 @@ from pymongo import MongoClient
 import time
 import public as P
 import urllib
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def test():
     f=2

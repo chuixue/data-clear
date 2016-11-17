@@ -10,6 +10,10 @@ import re
 import public as P
 import libCompany as libC
 import config as CFG
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 
 def cout(ls):
     for l in ls: print l, ':', ls[l],
@@ -24,7 +28,6 @@ def readCompanyOut(cfg):
     lsComp = {}
     
     index = 0
-    
     for item in cfg.tbProvenceOut.find():
         if 'companyName' not in item: continue
         cp = item['companyName']
@@ -72,6 +75,7 @@ def writeCompanyOut(cfg, lsComp):
 def readCompanyIn(cfg):
     print 'read company information in...'
     lsComp = {}
+    #cfg.tbProvenceIn.authenticate("readWriteAny","abc@123","admin")
     for item in cfg.tbProvenceIn.find():
         if 'companyName' not in item: continue
         cp = item['companyName']

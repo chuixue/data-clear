@@ -11,6 +11,10 @@ import public as P
 import libBidding as libB
 import copy
 import config as CFG
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 
 #class MyHTMLParser(HTMLParser):
 #    def __init__(self):

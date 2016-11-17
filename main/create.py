@@ -11,7 +11,9 @@ import createBidding as CB
 import createIndex as CL
 import config as CFG
 import createUpdate as CU
-        
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')      
 
 if __name__ == '__main__':
     print 'start all deal program '

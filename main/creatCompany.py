@@ -11,6 +11,10 @@ import re
 import public as P
 import libCompany as libC
 import config as CFG
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 
 def cout(ls):
     for l in ls: print l, ':', ls[l],

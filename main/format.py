@@ -6,6 +6,9 @@ Created on Jul 24, 2016
 '''
 from pymongo import MongoClient
 import re
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 def cout(ls):

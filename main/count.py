@@ -9,6 +9,9 @@ from pymongo import MongoClient
 import time
 import datetime
 import re
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 def cout(ls):

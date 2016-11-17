@@ -8,6 +8,9 @@ Created on Sep 19, 2016
 import datetime
 import re
 import public as P
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 #def Date_F(str):
 #    str = str.decode('utf8')

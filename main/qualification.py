@@ -4,6 +4,10 @@ Created on Sep 9, 2016
 
 @author: Administrator
 '''
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 lspf = [
         "城乡规划编制",
         "工程招标代理",

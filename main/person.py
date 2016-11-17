@@ -13,10 +13,10 @@ import re
 import string
 import numpy as np
 import public as P
-
 import sys
-#reload(sys)
-#sys.setdefaultencoding( "gb18030" )
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 import traceback
 
 def cout(ls):

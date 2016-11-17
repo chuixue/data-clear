@@ -6,7 +6,9 @@ Created on Oct 9, 2016
 from pymongo import MongoClient
 import public as P
 import config as CFG
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def createIndexs(cfg):
     for db in cfg.tbsIndex:

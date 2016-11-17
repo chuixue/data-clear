@@ -11,6 +11,9 @@ import datetime
 import re
 import public as P
 import config as CFG
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def cout(ls):
     for l in ls: print l, ':', ls[l],

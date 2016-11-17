@@ -7,6 +7,9 @@ Created on Sep 19, 2016
 import re
 import datetime
 import public as P
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def cout(ls):
     for l in ls: print l, ':', ls[l],

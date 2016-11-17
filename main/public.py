@@ -6,6 +6,9 @@ Created on Sep 9, 2016
 '''
 import datetime
 import re
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 def dbKeys(table, keys):
     temp = dict((k, 1) for k in keys)

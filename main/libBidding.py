@@ -7,7 +7,9 @@ Created on Sep 19, 2016
 import datetime
 import re
 from HTMLParser import HTMLParser
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 class MyHTMLParser(HTMLParser):
     def __init__(self):
