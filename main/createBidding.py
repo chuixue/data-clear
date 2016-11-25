@@ -50,14 +50,13 @@ class ReadBidding(object):
         self.lsBidding = []
         self.cfg = cfg
         self.db = self.cfg.dbBidding
-        self.db2 = self.cfg.dbBidding2
         self.fdn = ['projectName', 'biddingPrice', 'biddingDate', 'sourcesUrl', 'architects', 'content', 'company_name', 'type', 'sources', 'announcementId', 'updateTime']
         self.fdv = ['', '', '', '', '', '', '', '招标', '四川省政府政务服务和公共资源交易服务中心', '', datetime.datetime.now()]
     def log(self): print '--', len(self.lsBidding), 'Records collect.'
     
     def read_gs_invitationBid(self):
         lsmd5 = {}
-        for item in self.cfg.dbBidding2.gs_invitationBid.find({}, {'detailHtml':0}):
+        for item in self.cfg.dbBidding.gs_invitationBid.find({}, {'detailHtml':0}):
             line = dict(map(lambda k, v : (k,v), self.fdn, self.fdv))
             line['projectName'] = item['announcementName']
             line['biddingDate'] = P.Date_F(item['publishTime']) 
@@ -76,7 +75,7 @@ class ReadBidding(object):
         ErrIndex = 0
         fdv = copy.deepcopy(self.fdv)
         fdv[7] = '中标'
-        for item in self.cfg.dbBidding2.gs_bidCandidate.find(): #单位：元
+        for item in self.cfg.dbBidding.gs_bidCandidate.find(): #单位：元
             line = dict(map(lambda k, v : (k,v), self.fdn, fdv))
             line['projectName'] = re.sub('中标公示', '', item['announcementName'].encode('utf8'))
             line['biddingDate'] = P.Date_F(item['publishTime']) 
@@ -210,10 +209,10 @@ def readBidding(cfg):
     rb = ReadBidding(cfg)
     
     print 'read and deal table：gs_invitationBid'
-    #rb.read_gs_invitationBid()
+    rb.read_gs_invitationBid()
     
     print 'read and deal table：gs_bidCandidate'
-    #rb.read_gs_bidCandidate()
+    rb.read_gs_bidCandidate()
     
     print 'read and deal table：gst_bidResult'
     rb.read_gst_bidResult()

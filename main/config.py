@@ -25,6 +25,7 @@ class Config(object):
         self.dbCompany = db2
         self.dbSource = db2
         self.dbBidding = db2
+        self.tbBidding = db1.bidding
         self.companyAchievement = db2.companyAchievement
         self.dbNow = db1
         self.tbsIndex = [{'company':db1.companyInfoNew, 'person':db1.personNew, 'bidding':db1.bidding},

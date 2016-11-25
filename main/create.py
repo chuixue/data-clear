@@ -20,6 +20,10 @@ if __name__ == '__main__':
     dt = datetime.datetime.now()
     #*********************************************
     _cfg = CFG.Config()
+    print 'drop old collection in temp database.'
+    _cfg.writeCompany.drop()
+    _cfg.writePerson.drop()
+    _cfg.writeBidding.drop()
     
     print 'create table ', _cfg.writeCompany.name
     CC.writeCompanyIn(_cfg, CC.readCompanyIn(_cfg))
