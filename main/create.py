@@ -29,7 +29,7 @@ if __name__ == '__main__':
     CC.writeCompanyIn(_cfg, CC.readCompanyIn(_cfg))
     CC.writeCompanyOut(_cfg, CC.readCompanyOut(_cfg))
     
-    _cfg.writeCompany.create_index('id')
+    _cfg.writeCompany.create_index('id', unique=True)
     
     #exit()
     print 'create table ', _cfg.writePerson.name
