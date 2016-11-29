@@ -11,6 +11,16 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 def createIndexs(cfg):
+#    print cfg.writeCompany.find({}).count() 
+    
+    con1 = MongoClient('101.204.243.241', 27017)
+    db1 = con1['recommend']
+    db1.authenticate("readWriteAny","abc@123","admin")
+    print db1['recommend_history'].find().count()
+     
+#    db1.recommend_history.ensureIndex({"pro_id":1})
+    
+    return
     for db in cfg.tbsIndex:
         db['company'].create_index('id')
         db['company'].create_index('company_id')
@@ -57,7 +67,7 @@ if __name__ == '__main__':
     cfg = CFG.Config()
     
     createIndexs(cfg)
-    listIndexs(cfg)
-    addIdForSpecialCompany(cfg)
+#    listIndexs(cfg)
+#    addIdForSpecialCompany(cfg)
     
     

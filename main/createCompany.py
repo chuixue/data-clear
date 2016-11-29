@@ -15,13 +15,6 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-def cout(ls):
-    for l in ls: print l, ':', ls[l],
-    print
-def out(ls):
-    for l in ls: print l,
-    print
-
 #汇总入川企业资质
 def readCompanyOut(cfg):
     print 'read company information out...'

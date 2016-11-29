@@ -120,6 +120,7 @@ def updateHonors(cfg):
     for item in cfg.companyAchievement.find():
         if len(item['honors'])>0: lsHonor[item['companyName']] = item['honors']
         lsoperation[item['companyName']] = item['operationDetail']
+        
     for item in cfg.companyInfo.find():
         obj = {}
         cpname = item["company_name"]
@@ -223,9 +224,9 @@ if __name__ == '__main__':
 
     _cfg = CFG.Config()
     
-    updateCompanyBase(_cfg)
-    updateGoodRecord(_cfg)
+#    updateCompanyBase(_cfg)
+#    updateGoodRecord(_cfg)
     updateHonors(_cfg)
-    updateNewCourt(_cfg)
+#    updateNewCourt(_cfg)
 
     print datetime.datetime.now(), datetime.datetime.now()-dt

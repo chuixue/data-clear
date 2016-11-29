@@ -6,12 +6,14 @@ sys.setdefaultencoding('utf-8')
 
 class Config(object):
     def __init__(self):
-        con1 = MongoClient('101.204.243.241', 27017)
+        #con1 = MongoClient('101.204.243.241', 27017)
+        con1 = MongoClient('192.168.3.119', 27017)        
         con2 = MongoClient('101.204.243.241', 27017)
-        db1 = con1['jianzhu']
+        #db1 = con1['jianzhu']
+        db1 = con1['middle']
         db2 = con2['constructionDB']
         db3 = con2['jianzhu3']
-        db1.authenticate("readWriteAny","abc@123","admin")
+        #db1.authenticate("readWriteAny","abc@123","admin")
         db2.authenticate("readWriteAny","abc@123","admin")
         db3.authenticate("readWriteAny","abc@123","admin")
         self.connect = [con1, con2]
