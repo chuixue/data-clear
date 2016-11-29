@@ -23,7 +23,7 @@ def combineCompanyInfo(cfg, newName, oldName):
     lsOpera = {}
     id = 0
     oldRecord = {}
-    for item in cfg.writeCompany.find({'company_name': newName}):
+    for item in cfg.midCompany.find({'company_name': newName}):
         id = item['id']
         for q in item['qualification']:
             lmd5 = "".join([q['type'], q['class'], q['professional'], q['level']])
@@ -43,7 +43,7 @@ def combineCompanyInfo(cfg, newName, oldName):
     print 'qualification:{}，honor:{}，court:{}，badbehavior:{}, operation:{}'.format(len(lsQuali), len(lsHonor), len(lsCourt), len(lsBadbe), len(lsOpera))
     
     print 'read old company information by name'
-    for item in cfg.writeCompany.find({'company_name': oldName}):
+    for item in cfg.midCompany.find({'company_name': oldName}):
         oldRecord = item
         del oldRecord["_id"]
         for q in item['qualification']:
@@ -68,16 +68,16 @@ def combineCompanyInfo(cfg, newName, oldName):
     obj['updateTime'] = datetime.datetime.now()
     
     if id!=0:
-        cfg.writeCompany.update({'company_name':newName}, {'$set':obj})
+        cfg.midCompany.update({'company_name':newName}, {'$set':obj})
     else:
         oldRecord['company_name'] = newName
-        oldRecord['id'] = P.getMaxId(cfg.companyInfo, 'id') + 1
+        oldRecord['id'] = P.getMaxId(cfg.midCompany, 'id') + 1
         for key in obj: oldRecord[key] = obj[key]
         if 'badbehaviors' not in oldRecord: oldRecord['badbehaviors'] = {'creditScore':100, 'badBehaviorDetails':[]}
         if 'badBehaviorDetails' not in oldRecord['badbehaviors']: oldRecord['badbehaviors']['badbehaviors'] = []
         oldRecord['badbehaviors']['badBehaviorDetails'] = obj['badbehaviors.badBehaviorDetails']
         del oldRecord['badbehaviors.badBehaviorDetails']
-        cfg.writeCompany.insert(oldRecord)
+        if 'companyBases' in oldRecord: cfg.midCompany.insert(oldRecord)
     return True
 
 def combineBidding(cfg, newName, oldName):
@@ -85,26 +85,28 @@ def combineBidding(cfg, newName, oldName):
     lsbiddi = {}
     lsData = []
     id = 0
-    for item in cfg.writeBidding.find({'company_name': newName, 'type':'中标'}):
+    for item in cfg.midBidding.find({'company_name': newName, 'type':'中标'}):
         id = item['company_id']
         lmd5 = "".join([item['architects'], item['biddingPrice'], item['biddingDate'], item['projectName']])
         lsbiddi[lmd5] = item
     print 'new company records count:', len(lsbiddi)
     
     if id==0:
-        lsComp = P.getCompanyId(cfg.writeCompany)
+        lsComp = P.getCompanyId(cfg.midCompany)
         if newName in lsComp: id = lsComp[newName.encode('utf8')] 
     if id==0: return False
     
-    for item in cfg.writeBidding.find({'company_name': oldName, 'type':'中标'}):
+    for item in cfg.midBidding.find({'company_name': oldName, 'type':'中标'}):
         lmd5 = "".join([item['architects'], item['biddingPrice'], item['biddingDate'], item['projectName']])
         del item["_id"]
         item['id'] = id
         item['company_name'] = newName
         if lmd5 not in lsbiddi: lsData.append(item)
     print 'insert records count:', len(lsData)
-    cfg.writeBidding.insert(lsData)
-
+    cfg.midBidding.update({'company_name':newName}, {'$set':{'company_id':id}})
+    if len(lsData)>0: cfg.midBidding.insert(lsData)
+    
+    
 def combineData(cfg, newName, oldName):
     combineCompanyInfo(cfg, newName, oldName)
     combineBidding(cfg, newName, oldName)
@@ -114,7 +116,8 @@ if __name__ == '__main__':
     dt = datetime.datetime.now()
     #*********************************************
     _cfg = CFG.Config()
-    combineData(_cfg, "四川蜀望生态环保科技有限公司2", "四川蜀望生态环保科技有限公司")
+    print 'Hello'
+#    combineData(_cfg, "四川蜀望生态环保科技有限公司2", "四川蜀望生态环保科技有限公司")
 
 #    combineCompanyInfo(_cfg, "四川蜀望生态环保科技有限公司", "四川蜀望建设工程有限公司")
 #    combineBidding(_cfg, "四川蜀望生态环保科技有限公司", "四川蜀望建设工程有限公司")

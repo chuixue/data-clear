@@ -12,6 +12,8 @@ from pymongo import MongoClient
 import time
 import public as P
 import urllib
+import combineData as CD
+import csv
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -27,8 +29,6 @@ def haveNum(_s):
         if s in num: return True
     return False   
     
-def tp():
-    print a
 
 def gtn():
     line = {'id':1}
@@ -36,6 +36,11 @@ def gtn():
 
 if __name__ == '__main__':
     print datetime.datetime.now()
+    
+    reader = csv.reader(file(r'C:\Users\Administrator.xunying2\Desktop\test.csv', 'rb'))
+    for line in reader:
+        print line
+    
     #    re.findall()
 #    cs = re.compile(r'\d{4}\.\d{2} - \d{4}\.\d{2}|\d{4}\.\d{2} - 至今')
 #    test = '2013.02 - 2014.23上的伤口'
