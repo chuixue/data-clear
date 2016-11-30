@@ -9,8 +9,9 @@ class Config(object):
         #con1 = MongoClient('101.204.243.241', 27017)
         con1 = MongoClient('192.168.3.119', 27017)        
         con2 = MongoClient('101.204.243.241', 27017)
-        #db1 = con1['jianzhu']
-        db1 = con1['middle']
+        #con2 = MongoClient('192.168.3.45', 27017)
+        db1 = con1['jianzhu']
+        #db1 = con1['middle']
         db2 = con2['constructionDB']
         db3 = con2['jianzhu3']
         #db1.authenticate("readWriteAny","abc@123","admin")

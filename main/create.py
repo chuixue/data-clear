@@ -20,6 +20,7 @@ if __name__ == '__main__':
     dt = datetime.datetime.now()
     #*********************************************
     _cfg = CFG.Config()
+    
     print 'drop old collection in temp database.'
     _cfg.writeCompany.drop()
     _cfg.writePerson.drop()
@@ -31,7 +32,6 @@ if __name__ == '__main__':
     
     _cfg.writeCompany.create_index('id', unique=True)
     
-    #exit()
     print 'create table ', _cfg.writePerson.name
     CP.writePerson(_cfg, CP.readPerson(_cfg))
     

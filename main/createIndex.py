@@ -12,7 +12,7 @@ sys.setdefaultencoding('utf-8')
 
 def createIndexs(cfg):
     for db in cfg.tbsIndex:
-        db['company'].create_index('id', unique=True)
+        #db['company'].create_index('id', unique=True)
         db['company'].create_index('company_id')
         
         db['person'].create_index('id')

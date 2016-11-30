@@ -72,6 +72,7 @@ def getLinesOut(item):
     ctype = re.sub('入川', '', ctype)
     for c in item['certificates']:
         if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']=="": continue   #无效 
+        if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']==None: continue   #无效
         lv = c['qc_level'].encode('utf8') if c['qc_level'] else ''
         if c['qc_qualification']==None or c['qc_qualification'].strip()=='':     #不需要解析专业级别信息
             if lv=='(暂定)' or lv=='暂定级(暂定)' or lv=='': lv = '暂定级'
@@ -157,8 +158,9 @@ def getLines(item):
     lines = []
     ctype = item['companyBases'][0]['enterpriseType'].encode('utf8')
     for c in item['certificates']:
-        if c['qc_code'].find('安许证字')!=-1: continue  
-        if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']=="": continue   #无效 
+        if c['qc_code']!=None and c['qc_code'].find('安许证字')!=-1: continue 
+        if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']=="": continue   #无效
+        if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']==None: continue   #无效
         lv = c['qc_level'].encode('utf8') if c['qc_level'] else ''
         if c['qc_qualification']==None:     #不需要解析专业级别信息
             if lv=='(暂定)' or lv=='暂定级(暂定)' or lv=='': lv = '暂定级'
