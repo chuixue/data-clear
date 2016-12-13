@@ -191,7 +191,7 @@ def dealType(type, item):
               "GN":"暖通空调","SN":"暖通空调","CN":"暖通空调", "CD":"动力"}
         ps = [tp[t] for t in tp if item['certificateCode'].find(t)!=-1]
         p = '' if len(ps)<1 else ps[0]
-        if p=='' and item['certificateCode'][0:1]!='F': print item['certificateCode'], item['name'], item['detailUrl']
+        #if p=='' and item['certificateCode'][0:1]!='F': print item['certificateCode'], item['name'], item['detailUrl']
         if item['staffLevel'] not in names: return []
         line = [item['staffLevel'], p, '', item['certificateCode'], P.Date_F(item['validityDate'])]
         lines.append(line)

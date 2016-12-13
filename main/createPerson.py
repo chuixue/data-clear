@@ -82,18 +82,18 @@ class ReadPerson(object):
         self.db = self.cfg.dbPerson
     def log(self): print '--', len(self.personDic), 'Records collect.'
     
-    def read_personnelInPCopy(self):
-        for item in self.db.personnelInPCopy.find():
+    def _read_personnelInPCopy(self, cursor):
+        for item in cursor:
             if 0 == common_process(item, self.personDic):break
         self.log()
     
-    def read_personnelEnterPCopy(self):
-        for item in self.db.personnelEnterPCopy.find():
+    def _read_personnelEnterPCopy(self, cursor):
+        for item in cursor:
             if 0 == common_process(item, self.personDic):break
         self.log()
          
-    def read_WCSafetyEngineer(self):
-        for item in self.db.WCSafetyEngineer.find():
+    def _read_WCSafetyEngineer(self, cursor):
+        for item in cursor:
             item['name'] = item['engineerName']
             item['location'] = "四川省"
             item['idCard'] = item['idcard'].strip()
@@ -102,29 +102,29 @@ class ReadPerson(object):
             if 0 == common_process(item, self.personDic):break
         self.log()
         
-    def read_safetyEngineer(self):
+    def _read_safetyEngineer(self, cursor):
         common = [['engineerName', 'name'], ['engineerCode', 'certificateCode'], ['workUnits', 'companyName']]        
-        for item in self.db.safetyEngineer.find():
+        for item in cursor:
             for c in common: item[c[1]] = item[c[0]]
             item['location'] = "四川省" if item['companyType'] == "省内企业" else ""
             item['personId'] = 'safe-engineerCode'+ item['engineerCode']
             if 0 == common_process(item, self.personDic):break
         self.log()
             
-    def read_CERegistered(self):
+    def _read_CERegistered(self, cursor):
         common = [['engineerName', 'name'], ['registeredNumb', 'certificateCode'], ['registeredCompany', 'companyName'], ['validDate', 'validityDate'], ['registeredAgencies', 'location']]
-        for item in self.db.CERegistered.find():
+        for item in cursor:
             for c in common: item[c[1]] = item[c[0]]  
             item['personId'] = 'ce-registeredNumb'+ item['registeredNumb']
             if item['certificateCode'].find('建[造]')!=0: item['certificateCode'] = item['certificateCode'].replace('建〔造〕', '建[造]')
             if 0 == common_process(item, self.personDic):break
         self.log()
-        
-    def read_WCEngineer(self):
+          
+    def _read_WCEngineer(self, cursor):
         common = [['qualificationCertNum', 'certificateCode'], ['workingCompany', 'companyName'], ['personType', 'type']]
         lsclr = ['validityDate', 'professional', 'location', 'staffLevel']        
         lsn = { '造价员':1, '造价工程师':1, '质量检测员':1, '建造师':1 }
-        for item in self.db.WCEngineer.find():
+        for item in cursor:
             for c in common: item[c[1]] = item[c[0]]
             for c in lsclr: item[c] = ''
             if item['type']=='监理工程师' or item['type']=='总监理工程师': continue
@@ -139,6 +139,14 @@ class ReadPerson(object):
             if item['type'].encode('utf8') in lsn: item['professional'] = '水利'       
             if 0 == common_process(item, self.personDic):break
         self.log()
+    
+    def read_personnelInPCopy(self):return self._read_personnelInPCopy(self.db.personnelInPCopy.find())
+    def read_personnelEnterPCopy(self):return self._read_personnelEnterPCopy(self.db.personnelEnterPCopy.find())
+    def read_WCSafetyEngineer(self):return self._read_WCSafetyEngineer(self.db.WCSafetyEngineer.find())
+    def read_safetyEngineer(self):return self._read_safetyEngineer(self.db.safetyEngineer.find())
+    def read_CERegistered(self):return self._read_CERegistered(self.db.CERegistered.find())
+    def read_WCEngineer(self):return self._read_WCEngineer(self.db.WCEngineer.find())
+    
         
 '''''''''''''''''''''''''''''''''''''''Class End'''''''''''''''''''''''''''''''''''''''''''''
 '''合并同公司同姓名人员'''

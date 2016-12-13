@@ -8,10 +8,18 @@ import datetime
 import re
 import sys
 reload(sys)
-sys.setdefaultencoding('utf-8')
+sys.setdefaultencoding('utf8')
+
+def cout(ls):
+    for l in ls: print l, ':', ls[l] if type(ls[l])!=type('') else ls[l].encode('utf8'),
+    print
+def out(ls):
+    for l in ls: print l,
+    print
 
 def dbKeys(table, keys):
     temp = dict((k, 1) for k in keys)
+    lskey = {}
     for item in table.find({}).limit(1): lskey = dict((key, 0) for key in item if key not in temp)
     return lskey
 
@@ -20,6 +28,7 @@ def getCompanyId(table):
                  item['id']) for item in table.find({}, dbKeys(table, ['company_name', 'id']))) 
 
 def getMaxId(table, name):
+    if len(dbKeys(table, [name]))==0: return -1 
     return table.find({}, dbKeys(table, [name])).sort(name, -1).limit(1)[0][name]
 
 def strToDate(_str):

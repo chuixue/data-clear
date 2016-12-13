@@ -16,18 +16,6 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-#class MyHTMLParser(HTMLParser):
-#    def __init__(self):
-#        self.reset()
-#        self.fed = []
-#    def handle_data(self, d): self.fed.append(d)
-#    def html(self): return re.sub('\n| ', '', ''.join(self.fed)).strip()
-#
-#def getHtml(html):
-#    parser = MyHTMLParser()
-#    parser.feed(html)
-#    return parser.html().encode('utf8')
-
 def log(str):
     fp = open('c:\\t.txt', 'a')
     fp.write(str)
@@ -54,9 +42,19 @@ class ReadBidding(object):
         self.fdv = ['', '', '', '', '', '', '', '招标', '四川省政府政务服务和公共资源交易服务中心', '', datetime.datetime.now()]
     def log(self): print '--', len(self.lsBidding), 'Records collect.'
     
+    def read_gst_bidResult(self):
+        return self._read_gst_bidResult(self.cfg.dbBidding.gst_bidResult.find())
+    def read_gs_bidCandidate(self):
+        return self._read_gs_bidCandidate(self.cfg.dbBidding.gs_bidCandidate.find())
     def read_gs_invitationBid(self):
+        return self._read_gs_invitationBid(self.cfg.dbBidding.gs_invitationBid.find({}, {'detailHtml':0}))
+    def read_gst_project(self):
+        return self._read_gst_project(self.cfg.dbBidding.gst_project.find())
+    
+    
+    def _read_gs_invitationBid(self, cursor):
         lsmd5 = {}
-        for item in self.cfg.dbBidding.gs_invitationBid.find({}, {'detailHtml':0}):
+        for item in cursor:
             line = dict(map(lambda k, v : (k,v), self.fdn, self.fdv))
             line['projectName'] = item['announcementName']
             line['biddingDate'] = P.Date_F(item['publishTime']) 
@@ -68,14 +66,16 @@ class ReadBidding(object):
             if lmd5 in lsmd5: print lmd5
             lsmd5[lmd5] = 1
             self.lsBidding.append(line)
+            if len(self.lsBidding)>1000: break  #----------------------------------------------------
+            
         self.log()
     
-    def read_gs_bidCandidate(self):
+    def _read_gs_bidCandidate(self, cursor):
         lsmd5 = {}
         ErrIndex = 0
         fdv = copy.deepcopy(self.fdv)
         fdv[7] = '中标'
-        for item in self.cfg.dbBidding.gs_bidCandidate.find(): #单位：元
+        for item in cursor: #单位：元
             line = dict(map(lambda k, v : (k,v), self.fdn, fdv))
             line['projectName'] = re.sub('中标公示', '', item['announcementName'].encode('utf8'))
             line['biddingDate'] = P.Date_F(item['publishTime']) 
@@ -89,16 +89,18 @@ class ReadBidding(object):
             ErrIndex += 1 ^ libB.readHtmlInfo(st[0], line) if len(st)>0 else 1
             if not len(st)>0 or 'company_name' not in line or len(line['company_name'])<2: continue
             self.lsBidding.append(line)
+            if len(self.lsBidding)>2000: break  #----------------------------------------------------
+            
         print '--', ErrIndex, 'error records.'
         self.log()
     
-    def read_gst_bidResult(self):
+    def _read_gst_bidResult(self, cursor):
         lsmd5 = {}
         fdv = copy.deepcopy(self.fdv)
         fdv[7] = '中标'
         fdv[8] = '四川省住房和城乡建设厅'
         index = 0
-        for item in self.cfg.dbBidding.gst_bidResult.find(): #单位：万元
+        for item in cursor: #单位：万元
             line = dict(map(lambda k, v : (k,v), self.fdn, fdv))
             line['projectName'] = item['projectName'].encode('utf8')
             line['biddingDate'] = P.Date_F(item['biddingMessage'][0]['biddingNoticeDate']) 
@@ -115,12 +117,12 @@ class ReadBidding(object):
             self.lsBidding.append(line)
         self.log()
             
-    def read_gst_project(self):
+    def _read_gst_project(self, cursor):
         lsmd5 = {}
         fdv = copy.deepcopy(self.fdv)
         fdv[8] = '四川省住房和城乡建设厅'
         fdv[7] = '中标'
-        for item in self.cfg.dbBidding.gst_project.find(): #单位：万元
+        for item in cursor: #单位：万元
             line = dict(map(lambda k, v : (k,v), self.fdn, fdv))
             line['projectName'] = item['projectName'].encode('utf8')
             line['sourcesUrl'] = item['detailURL']
@@ -152,6 +154,7 @@ class ReadBidding(object):
                 lsmd5[lmd5] = 1
                 self.lsBidding.append(line)
         self.log()
+        
         
 def remove_repeat(lines):
     lsData = []

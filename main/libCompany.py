@@ -157,6 +157,7 @@ def getLinesOut(item):
 def getLines(item):
     lines = []
     ctype = item['companyBases'][0]['enterpriseType'].encode('utf8')
+    if not ctype or ctype=='': return []
     for c in item['certificates']:
         if c['qc_code']!=None and c['qc_code'].find('安许证字')!=-1: continue 
         if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']=="": continue   #无效
@@ -178,6 +179,7 @@ def getLines(item):
         else:
             stp = c['qc_qualification'].split(',')
             for line in stp:
+                if ctype not in cBase: continue
                 stp = re.split('|'.join(cBase[ctype]), line.encode('utf8'))
                 p = findp(ctype, line)       #大类，分类，专业，级别, 证书，有效期
                 if p==[] or line.strip()=='': continue
@@ -210,7 +212,7 @@ def getLines(item):
                 else:
                     print 'Error', line
                 row[3] = re.sub('资质|--请选择--| ', '', row[3])
-                if row[3]=='': row[3] = c['qc_level'].encode('utf8')
+                if row[3]=='' and c['qc_level']: row[3] = c['qc_level'].encode('utf8')
                 if ctype in { '建筑业':1, '园林绿化':1, '设计施工一体化':1 }: row[0] = '工程施工'
                 lines.append(row)
                 

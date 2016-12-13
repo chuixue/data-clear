@@ -7,16 +7,17 @@ sys.setdefaultencoding('utf-8')
 class Config(object):
     def __init__(self):
         #con1 = MongoClient('101.204.243.241', 27017)
-        con1 = MongoClient('192.168.3.119', 27017)        
-        con2 = MongoClient('101.204.243.241', 27017)
-        #con2 = MongoClient('192.168.3.45', 27017)
+        con1 = MongoClient('192.168.3.119', 27017)       #本地库      
+        #con2 = MongoClient('101.204.243.241', 27017)    #远程库
+        con2 = MongoClient('192.168.3.45', 27017)        #数据源
         db1 = con1['jianzhu']
         #db1 = con1['middle']
         db2 = con2['constructionDB']
-        db3 = con2['jianzhu3']
+        #db3 = con2['jianzhu3']
+        db3 = con1['jianzhu']
         #db1.authenticate("readWriteAny","abc@123","admin")
-        db2.authenticate("readWriteAny","abc@123","admin")
-        db3.authenticate("readWriteAny","abc@123","admin")
+        #db2.authenticate("readWriteAny","abc@123","admin")
+        #db3.authenticate("readWriteAny","abc@123","admin")
         self.connect = [con1, con2]
         self.tbProvenceIn = db2.EInProvenceDetail
         self.tbProvenceOut = db2.EOutProvenceDetail
@@ -34,6 +35,7 @@ class Config(object):
         self.tbBidding = db1.bidding
         self.companyAchievement = db2.companyAchievement
         self.dbNow = db1
+        self.tbLog = db1.myLog
         self.tbsIndex = [{'company':db1.companyInfoNew, 'person':db1.personNew, 'bidding':db1.bidding},
                          {'company':db3.companyInfoNew, 'person':db3.personNew, 'bidding':db3.bidding}]
         self.tbsSpecial = [db3.SpecialCondition, db3.SpecialCondition]
