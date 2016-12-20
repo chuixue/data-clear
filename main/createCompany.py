@@ -132,20 +132,19 @@ def writeCompanyIn(cfg, lsComp):
     cfg.writeCompany.insert(dt)
     
     
-    
 if __name__ == '__main__':
     print 'Hello '
     dt = datetime.datetime.now()
     #*********************************************
     _cfg = CFG.Config()
-#    readCompanyOut(_cfg)
+    readCompanyIn(_cfg)
 #    
 #    exit()
 #    readCompanyOut(_cfg)
     
     
     #writeCompanyIn(_cfg, readCompanyIn(_cfg))
-    writeCompanyOut(_cfg, readCompanyOut(_cfg))
+    #writeCompanyOut(_cfg, readCompanyOut(_cfg))
     
     _cfg.writeCompany.create_index('id')
 

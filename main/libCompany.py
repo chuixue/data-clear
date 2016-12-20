@@ -54,6 +54,7 @@ cProfessionalsIn = {
                  "地基基础专业承包" : "地基基础工程专业承包", 
                  "机电安装工程施工总承包" : "机电工程施工总承包"
             }
+cLevelIn = {'壹':'一', '贰':'二', '叁':'三', '肆':'四'}
 
 def findp(ctype, line): return [p for p in cBase[ctype] if line.find(p)!=-1]
 
@@ -157,20 +158,20 @@ def getLinesOut(item):
 def getLines(item):
     lines = []
     ctype = item['companyBases'][0]['enterpriseType'].encode('utf8')
+    
     if not ctype or ctype=='': return []
     for c in item['certificates']:
         if c['qc_code']!=None and c['qc_code'].find('安许证字')!=-1: continue 
         if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']=="": continue   #无效
         if c['qc_qualification']==None and c['qc_level']==None and c['qc_code']==None: continue   #无效
-        lv = c['qc_level'].encode('utf8') if c['qc_level'] else ''
+        lv = c['qc_level'].encode('utf8').strip() if c['qc_level'] else ''
+        c['qc_code'] = c['qc_code'].encode('utf8').strip().replace('　', '')
         if c['qc_qualification']==None:     #不需要解析专业级别信息
             if lv=='(暂定)' or lv=='暂定级(暂定)' or lv=='': lv = '暂定级'
             row = [ctype, '', '', lv, c['qc_code'], P.Date_F(c['qc_validityDate'])]
-            
-#            if ctype=="园林绿化":
-#                cout(c)
-                #out(row)
-            
+            if ctype=="园林绿化":
+                _lv = re.split('\.|·', c['qc_code'].encode('utf8'))[-1]
+                if _lv in cLevelIn: row[3] = cLevelIn[_lv]+'级'
             if ctype in cMaps:    #特定类别及专业 
                 row[2] = row[1] = cMaps[ctype]                 
             if row[3].find('、')!=-1: row[3] = row[3].split('、')[0]   #仅一条
@@ -215,5 +216,6 @@ def getLines(item):
                 if row[3]=='' and c['qc_level']: row[3] = c['qc_level'].encode('utf8')
                 if ctype in { '建筑业':1, '园林绿化':1, '设计施工一体化':1 }: row[0] = '工程施工'
                 lines.append(row)
-                
+            '''End For'''
+        '''End Else'''    
     return lines

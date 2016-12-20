@@ -7,9 +7,9 @@ sys.setdefaultencoding('utf-8')
 class Config(object):
     def __init__(self):
         #con1 = MongoClient('101.204.243.241', 27017)
-        con1 = MongoClient('192.168.3.119', 27017)       #本地库      
+        con1 = MongoClient('10.101.1.119', 27017)       #本地库      
         #con2 = MongoClient('101.204.243.241', 27017)    #远程库
-        con2 = MongoClient('192.168.3.45', 27017)        #数据源
+        con2 = MongoClient('10.101.1.224', 27017)        #数据源
         db1 = con1['jianzhu']
         #db1 = con1['middle']
         db2 = con2['constructionDB']

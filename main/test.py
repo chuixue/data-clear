@@ -37,9 +37,11 @@ def gtn():
 if __name__ == '__main__':
     print datetime.datetime.now()
     
-    reader = csv.reader(file(r'C:\Users\Administrator.xunying2\Desktop\test.csv', 'rb'))
-    for line in reader:
-        print line
+#    reader = csv.reader(file(r'C:\Users\Administrator.xunying2\Desktop\test.csv', 'rb'))
+#    for line in reader:
+#        print line
+    print re.split('\.|·', 'hello.123·ffw你好')
+    
     
     #    re.findall()
 #    cs = re.compile(r'\d{4}\.\d{2} - \d{4}\.\d{2}|\d{4}\.\d{2} - 至今')
