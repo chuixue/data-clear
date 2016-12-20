@@ -62,10 +62,9 @@ def writeCompanyOut(cfg, lsComp):
     for comp in lsComp:
         if comp in lsOrig:
             lsComp[comp]['qualification'] = dict(getQualification(lsOrig[comp]['qualification']), **lsComp[comp]['qualification']).values()
-            lsComp[comp]['company_qualification'] = ','.join([v['professional']+v['level'] for v in lsComp[comp]['qualification'].values()])
+            lsComp[comp]['company_qualification'] = ','.join([v['professional']+v['level'] for v in lsComp[comp]['qualification']])
             lsUpdate.append([{'id':lsOrig[comp]['id']}, {'$set':{'qualification':lsComp[comp]['qualification'],
                                  'company_qualification':lsComp[comp]['company_qualification']}}])
-            print comp
             continue
         lsComp[comp]['companyBases']['enterpriseType'] = lsComp[comp]['companyBases']['enterpriseType'].keys()
         lsComp[comp]['company_qualification'] = ','.join([v['professional']+v['level'] for v in lsComp[comp]['qualification'].values()])
@@ -74,11 +73,9 @@ def writeCompanyOut(cfg, lsComp):
         index += 1
         lsInsert.append(lsComp[comp])
     print 'write into table', len(lsInsert), '...'
-    #cfg.writeCompany.insert(lsInsert)
-    
-    print 'update some company', len(lsUpdate), '...'
-    for d in lsUpdate:
-        cfg.writeCompany.update(d[0], d[1])
+    cfg.writeCompany.insert(lsInsert)
+    print 'update some repeat company', len(lsUpdate), '...'
+    for d in lsUpdate: cfg.writeCompany.update(d[0], d[1])
     print 'complete!'
 
 
@@ -137,14 +134,14 @@ if __name__ == '__main__':
     dt = datetime.datetime.now()
     #*********************************************
     _cfg = CFG.Config()
-    readCompanyIn(_cfg)
+#    readCompanyIn(_cfg)
 #    
 #    exit()
 #    readCompanyOut(_cfg)
     
     
     #writeCompanyIn(_cfg, readCompanyIn(_cfg))
-    #writeCompanyOut(_cfg, readCompanyOut(_cfg))
+    writeCompanyOut(_cfg, readCompanyOut(_cfg))
     
     _cfg.writeCompany.create_index('id')
 
