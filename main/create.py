@@ -50,7 +50,6 @@ if __name__ == '__main__':
     CU.updateHonors(_cfg)
     CU.updateNewCourt(_cfg)
     
-    
     print 'create indexs'
     CL.createIndexs(_cfg)
     CL.listIndexs(_cfg)
