@@ -22,6 +22,9 @@ def out(ls):
     for l in ls: print l,
     print
 
+def isPersonId(personId):
+    return len(personId)==36 and personId[13:15]=='-4'
+
 class Type(object):
     def __init__(self):self.index = 0
     
@@ -154,6 +157,7 @@ def dealType(type, item):
         if 'professional' not in item: item['professional'] = ''
         if item['professional'] in tp: p = item['professional'] 
         if p not in tp: p ='建'
+        item['certificateCode'] = item['certificateCode'].replace('建【造】', '建[造]') 
         line = ['造价工程师', tp[p], '', item['certificateCode'], item['validityDate']]
         lines.append(line)
     elif type == 'zjy':

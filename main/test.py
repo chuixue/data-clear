@@ -13,13 +13,21 @@ import time
 import public as P
 import urllib
 import combineData as CD
+import libLog as LG
 import csv
+import md5
+import base64
+import hashlib
+import random
+
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-def test():
-    f=2
+
+def sortString(str):
+    return ','.join(sorted(str.split(',')))
+#    return ','.join(set(str.split(',')))
     
 def haveNum(_s):
     if (not _s) or _s.strip()=='': return False
@@ -29,18 +37,143 @@ def haveNum(_s):
         if s in num: return True
     return False   
     
-
+def ttt():
+    print 'tt'
+    
 def gtn():
     line = {'id':1}
     return line
 
+def getCount(txt):
+    ls = {}
+    for c in txt:
+        ls[c] = ls[c]+1 if c in ls else 1 
+    #print sorted(ls.values())
+    return ls
+
+def getBase(src):
+    s1 = base64.encodestring(src)
+    s2 = base64.decodestring(s1)
+    print '\t', s1
+    print '\t', s2
+    
+def getMd5(src):
+    print 
+    m1 = md5.new()   
+    m1.update(src)   
+#    print m1.hexdigest()
+#    print '\t', getCount(src)
+#    print '\t', getCount(m1.hexdigest())
+    
+    return m1.hexdigest()
+
+
 if __name__ == '__main__':
     print datetime.datetime.now()
+    ls = {}
+    lp = {}
+    for i in range(0, 10):
+        _tp = {'id':i, 'dt':i+2}
+        ls[i] = _tp
+        lp[i] = ls[i] 
+    ls[1]['dt'] = 12306
+    print ls
+    print lp
+    
+#    #1 - 10
+#    s = ['s', 't', 'l']
+#    p = "E8E9779F-0BDF-4869-ACC3-B6E7E8695F56"
+#    print len(p), p[13:15]
+#    if len(p)==36 and p[13:15]=='-4':
+#        print 'ok'
+        
+#    for i in range(0, 100):
+#        print s[int(random.random() * len(s))],
+#    con1 = MongoClient('101.204.243.241', 27017)
+
+#    ls = [ttt]
+#    ls[0]()
+#    tp1 = ['511026195601286014', '511026195603020615', '511026195603064415', '511026195401163714']
+#    tp2 = ['17B5C712-7725-4149-8A05-901256AFCAFA', '00CED829-40DA-4A65-BE4B-E3B7542D60D9', '1DD94569-9DD2-448B-AB3B-A08B6E08F7BE',
+#           '27D3B595-A311-4269-9D9B-81B1885EB25C']
+#    index = 0
+#    for t in tp1:
+#        print t
+#        print '\t', tp2[index]
+#        
+#        print '\t', getMd5(t[6:14] + t[0:6] + t[14:])
+#        print '\t', getMd5(t[6:14] + t[14:] + t[0:6])
+#        print '\t', getMd5(t[14:] + t[6:14] + t[0:6])
+#        print '\t', getMd5(t[14:] + t[0:6] + t[6:14])
+#        print '\t', getMd5(t[0:6] + t[14:] + t[6:14]) 
+#        
+#        getBase(t)
+#        getBase(t[::-1])
+#        print '\t', getMd5(t)
+#        print '\t', getMd5(t[::-1])
+#        print 
+#        index += 1
+#    sss = "AA52993F-4FEE-480F-AC82-7EFA7B19339F"
+#    print getCount(sss)
+#    src = '622623198807100039'; getMd5(src)
+##    src = '622623'; getMd5(src)
+##    src = '19880710'; getMd5(src)
+##    src = '0039'; getMd5(src) 
+#    print 
+#    src = '622623198807100039'[::-1]; getMd5(src)
+##    src = '622623'[::-1]; getMd5(src)
+##    src = '19880710'[::-1]; getMd5(src)
+##    src = '0039'[::-1]; getMd5(src)
+#    src = '622623198807100039'; getMd5(src)
+#    src = '622623198807100039'[::-1]; getMd5(src)
+    
+    
+    
+    
+    exit()    
+    con1 = MongoClient('10.101.1.119', 27017)
+    db = con1['jianzhu']
+    ls = {}
+#    for item in db['personNew'].find():
+#        if item['personId'] not in ls:
+#            ls[item['personId']] = item['company_name']
+#        else:
+#            print item['company_name'], ls[item['personId']]
+    
+    for item in db['WCSafetyEngineer'].find():
+#        if not P.checkIdCard(item['idCard']): 
+            ls[item['idcard']] = item
+#            print item['idCard']
+    for item in db['personIDCard'].find():
+#        if item['personIDCard'] in ls:
+#                print item['personIDCard']
+        if not P.checkIdCard(item['personIDCard']):
+#            print item['personIDCard']
+            if item['personIDCard'] in ls:
+                print item['personIDCard']
+    
+#    db = con1['constructionDB']
+#    db.authenticate("readWriteAny","abc@123","admin")
+#    lg = LG.Log()
+#    lg.log(1, 2, 3)
+
+#    for item in db['bidding'].find({'type':'招标'}).sort('biddingDate',pymongo.DESCENDING).limit(100):
+#        print item['biddingDate'], item['projectName']
+#   
+#    for item in db['gs_invitationBid'].find().sort('publishTime',pymongo.DESCENDING).limit(2):
+#        print item['publishTime'], item
+#        
+#    for item in db['gst_project'].find().sort('publishDate',pymongo.DESCENDING).limit(2):
+#        print item['publishDate'], item
+    
+             
+#    print sortString("qwert,12345,asd,你妹啊,钢结构工程专,建筑装修装饰")
+#    print sortString("qwert,你妹啊,asd,12345,建筑装修装饰,钢结构工程专")
     
 #    reader = csv.reader(file(r'C:\Users\Administrator.xunying2\Desktop\test.csv', 'rb'))
 #    for line in reader:
 #        print line
-    print re.split('\.|·', 'hello.123·ffw你好')
+#    print re.split('\.|·', 'hello.123·ffw你好')
     
     
     #    re.findall()
@@ -117,8 +250,8 @@ if __name__ == '__main__':
 #        ls.append(ln)
 #    ls[0]['id'] = 32
 #    print ls
-    st = ("23"
-        "13"'23')
+#    st = ("23"
+#        "13"'23')
     
 #    print pc
 #    print pl
@@ -141,9 +274,9 @@ if __name__ == '__main__':
 #    con1 = MongoClient('localhost', 27017)
 #    con2 = MongoClient('192.168.3.45', 27017)
 #    con3 = MongoClient('171.221.173.154', 27017)
-    con1 = MongoClient('192.168.3.119', 27017)
-    db1 = con1['jianzhu3']
-    print db1['bidding'].find().count()
+#    con1 = MongoClient('192.168.3.119', 27017)
+#    db1 = con1['jianzhu3']
+#    print db1['bidding'].find().count()
     
 #    tb = db1.tbtest
 #    lines = [{'cpname':'公司1', 'proj':'项目1', 'type':'中标'},

@@ -21,6 +21,7 @@ class Config(object):
         self.connect = [con1, con2]
         self.tbProvenceIn = db2.EInProvenceDetail
         self.tbProvenceOut = db2.EOutProvenceDetail
+        self.tppersonIDCard = db2.personIDCard
         self.companyInfo = db1.companyInfoNew
         self.writeCompany = db1.companyInfoNew
         self.writePerson = db1.personNew

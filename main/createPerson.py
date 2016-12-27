@@ -11,6 +11,8 @@ import libPerson as libP
 import copy
 import config as CFG
 import traceback
+import re
+import random
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -80,7 +82,19 @@ class ReadPerson(object):
         self.personDic = {}
         self.cfg = cfg
         self.db = self.cfg.dbPerson
+        self.tbCard = self.cfg.tppersonIDCard
+        self.loadIDCard()
+        
     def log(self): print '--', len(self.personDic), 'Records collect.'
+    
+    def loadIDCard(self):
+        print 'read IDCard information...'
+        self.IdCard = {}
+        for item in self.tbCard.find():
+            item['idCard'] = re.sub('x', 'X', re.sub("\?|？", "", item['personIDCard'].strip()))
+            if not P.checkIdCard(item['idCard']): continue
+            if item['personId'] not in self.IdCard: self.IdCard[item['idCard']] = item['personId'] 
+        print 'read IDCard information OK'    
     
     def _read_personnelInPCopy(self, cursor):
         for item in cursor:
@@ -97,7 +111,11 @@ class ReadPerson(object):
             item['name'] = item['engineerName']
             item['location'] = "四川省"
             item['idCard'] = item['idcard'].strip()
-            item['personId'] = 'idcard-'+ item['idCard'] if item['idCard'] != '' else item['certificateCode']  
+            if P.checkIdCard(item['idCard']) and item['idCard'] in self.IdCard: 
+                item['personId'] = self.IdCard[item['idCard']]
+            else: 
+                item['idCard'] = 'certificateCode' + item['certificateCode']
+                item['personId'] = 'idcard-'+ item['idCard'] if item['idCard'] != '' else item['certificateCode']  
             item['companyName'] = item['workUnits']
             if 0 == common_process(item, self.personDic):break
         self.log()
@@ -134,8 +152,11 @@ class ReadPerson(object):
                 item['staffLevel'] = item['gridViewPersonAptitudes'][0]['level']
                 item['certificateCode'] = item['gridViewPersonAptitudes'][0]['certificateNumber']
             item['idCard'] = item['idCard'].strip()
-            item['personId'] = 'idcard-'+ item['idCard']
-            if item['idCard']=='': item['personId'] = 'idcard-'+ item['qualificationCertNum']
+            if P.checkIdCard(item['idCard']) and item['idCard'] in self.IdCard: 
+                item['personId'] = self.IdCard[item['idCard']]
+            else:
+                item['personId'] = 'idcard-'+ item['idCard']
+                if item['idCard']=='': item['personId'] = 'idcard-'+ item['qualificationCertNum']
             if item['type'].encode('utf8') in lsn: item['professional'] = '水利'       
             if 0 == common_process(item, self.personDic):break
         self.log()
@@ -167,10 +188,45 @@ def combinePersonByNameAndCompanyname(personDic):
     print len(lsCpPs), 'combine from', len(personDic)  
     return lsCpPs
 
+'''按姓名合并同公司无PersonId人员'''
+def combinePersonNoIdByName(personDic):
+    lsPsId = {}
+    lsAll = {}
+    '''记录有personId的数据'''
+    for p in personDic:
+        cps = personDic[p]['companyname'].keys()
+        if len(cps)==0: cps = {'':1}
+        for cp in cps:     
+            personDic[p]['company_name'] = cp.encode('utf8')
+            key = (cp + '_'+ personDic[p]['name'].strip()).encode('utf8')
+            if cp!='' and libP.isPersonId(p):
+                if key not in lsPsId: lsPsId[key] = []
+                lsPsId[key].append(personDic[p])
+    print len(lsPsId)
+    '''合并其它来源人员'''
+    for p in personDic:
+        if libP.isPersonId(p): continue 
+        cps = personDic[p]['companyname'].keys()
+        if len(cps)==0: cps = {'':1}        
+        for cp in cps:                
+            personDic[p]['company_name'] = cp.encode('utf8')
+            if cp=='': lsAll[p] = personDic[p]; continue
+            key = (cp + '_'+ personDic[p]['name'].strip()).encode('utf8')
+            if key in lsPsId:
+                rindex = int(random.random() * len(lsPsId[key]))
+                lsPsId[key][rindex]['certificate'] = dict(personDic[p]['certificate'], **lsPsId[key][rindex]['certificate'])
+            else:
+                lsAll[p] = personDic[p]
+    for key in lsPsId:
+        for item in lsPsId[key]: lsAll[item['personId']] = item 
+    print len(lsAll), 'combine from', len(personDic)  
+    return lsAll
+
+
 '''写入数据库'''
 def writePerson(cfg, personDic):
     lsCompany = P.getCompanyId(cfg.companyInfo)
-    index = 50000000
+    index = 50000001
     for p in personDic:
         cps = personDic[p]['companyname'].keys()
         #cpname = '' if len(cps)==0 else cps[0].encode('utf8')
@@ -183,6 +239,7 @@ def writePerson(cfg, personDic):
         index += 1
         personDic[p]['company_id'] = lsCompany[cpname] if cpname in lsCompany else 0 
         personDic[p]['id'] = index
+        personDic[p]['name'] = personDic[p]['name'].replace(' ', '')
         personDic[p]['label'] = 0
         personDic[p]['other'] = ''
         personDic[p]['updateTime'] = datetime.datetime.now()
@@ -190,28 +247,22 @@ def writePerson(cfg, personDic):
     cfg.writePerson.insert(personDic.values())
     
 def readPerson(cfg): 
-    rp = ReadPerson(cfg)
-    
-    print 'read and deal table：personnelInPCopy'
-    rp.read_personnelInPCopy()
-
-    print 'read and deal table：personnelEnterPCopy'
-    rp.read_personnelEnterPCopy()
-
-    print 'read and deal table：WCSafetyEngineer'
-    rp.read_WCSafetyEngineer()
-
-    print 'read and deal table：safetyEngineer'
-    rp.read_safetyEngineer()
-    
-    print 'read and deal table：CERegistered'        
-    rp.read_CERegistered()
-    
-    print 'read and deal table：WCEngineer'
-    rp.read_WCEngineer()
+    RP = ReadPerson(cfg)
+    callbacks = {'personnelInPCopy':RP.read_personnelInPCopy, 'personnelEnterPCopy':RP.read_personnelEnterPCopy,
+                         'WCSafetyEngineer':RP.read_WCSafetyEngineer, 'safetyEngineer':RP.read_safetyEngineer,
+                         'CERegistered':RP.read_CERegistered, 'WCEngineer':RP.read_WCEngineer
+                         }
+    for tb in callbacks:
+        print 'read and deal table：', tb
+        if tb=='personnelInPCopy': continue
+        
+        '''依次处理各源表'''
+        
+        callbacks[tb]()
     
     '''''''''''''''''''''人名与公司名同归为一人·该部分可去掉'''''''''''''''''''''''''''''''''
-    personDic = combinePersonByNameAndCompanyname(rp.personDic)
+    #personDic = combinePersonByNameAndCompanyname(RP.personDic)
+    personDic = combinePersonNoIdByName(RP.personDic)
     ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     return personDic
 
@@ -227,14 +278,19 @@ if __name__ == '__main__':
     _cfg = CFG.Config()
     
 #    rp = ReadPerson(_cfg)
+        
 #    rp.read_personnelInPCopy()
 #    rp.read_personnelEnterPCopy()
 #    rp.read_safetyEngineer()
-#    calcPerson(rp.personDic)
+#    rp.read_WCSafetyEngineer()
+#    rp.read_WCEngineer()
     
+#    calcPerson(rp.personDic)
+#    exit()
+
     writePerson(_cfg, readPerson(_cfg))
-    _cfg.write.ensure_index('id')
-    _cfg.write.ensure_index('company_id')
+    _cfg.writePerson.ensure_index('id')
+    _cfg.writePerson.ensure_index('company_id')
     
   
     

@@ -10,6 +10,7 @@ import re
 import public as P
 import libCompany as libC
 import config as CFG
+import libLog as LG
 import json
 import sys
 reload(sys)
@@ -54,7 +55,8 @@ def getQualification(qua):
     return dict((','.join([q['type'], q['class'], q['professional'], q['level'], q['code'], q['validityDates']]), q) for q in qua)
 
 def writeCompanyOut(cfg, lsComp):
-    print 'select the max id.'
+    lg = LG.Log()
+    lg.log('select the max id.')
     index = P.getMaxId(cfg.companyInfo, 'id') + 1
     lsOrig = getCompanyOriginal(cfg) 
     lsInsert = []
@@ -72,12 +74,12 @@ def writeCompanyOut(cfg, lsComp):
         lsComp[comp]['id'] = index
         index += 1
         lsInsert.append(lsComp[comp])
-    print 'write into table', len(lsInsert), '...'
-    cfg.writeCompany.insert(lsInsert)
-    print 'update some repeat company', len(lsUpdate), '...'
+    lg.log( 'write into table', len(lsInsert), '...')
+    if len(lsInsert)>0: cfg.writeCompany.insert(lsInsert)
+    lg.log( 'update some repeat company', len(lsUpdate), '...')
     for d in lsUpdate: cfg.writeCompany.update(d[0], d[1])
-    print 'complete!'
-
+    lg.log( 'complete!')
+    lg.save()
 
 def readCompanyIn(cfg):
     cursor = cfg.tbProvenceIn.find({})
@@ -115,6 +117,7 @@ def _readCompanyIn(cfg, cursor):
     return lsComp
 
 def writeCompanyIn(cfg, lsComp):
+    lg = LG.Log()
     index = 10000001
     dt = []
     for comp in lsComp:
@@ -125,8 +128,9 @@ def writeCompanyIn(cfg, lsComp):
         lsComp[comp]['id'] = index
         index += 1
         dt.append(lsComp[comp])
-    print 'write', len(lsComp), 'records'
+    lg.log( 'write', len(lsComp), 'records')
     cfg.writeCompany.insert(dt)
+    lg.save()
     
     
 if __name__ == '__main__':
@@ -134,13 +138,11 @@ if __name__ == '__main__':
     dt = datetime.datetime.now()
     #*********************************************
     _cfg = CFG.Config()
-#    readCompanyIn(_cfg)
-#    
-#    exit()
+#    readCompanyIn(_cfg)    
 #    readCompanyOut(_cfg)
     
     
-    #writeCompanyIn(_cfg, readCompanyIn(_cfg))
+    writeCompanyIn(_cfg, readCompanyIn(_cfg))
     writeCompanyOut(_cfg, readCompanyOut(_cfg))
     
     _cfg.writeCompany.create_index('id')

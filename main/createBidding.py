@@ -66,7 +66,7 @@ class ReadBidding(object):
             if lmd5 in lsmd5: print lmd5
             lsmd5[lmd5] = 1
             self.lsBidding.append(line)
-            if len(self.lsBidding)>1000: break  #----------------------------------------------------
+            #if len(self.lsBidding)>1000: break  #----------------------------------------------------
             
         self.log()
     
@@ -89,7 +89,7 @@ class ReadBidding(object):
             ErrIndex += 1 ^ libB.readHtmlInfo(st[0], line) if len(st)>0 else 1
             if not len(st)>0 or 'company_name' not in line or len(line['company_name'])<2: continue
             self.lsBidding.append(line)
-            if len(self.lsBidding)>2000: break  #----------------------------------------------------
+            #if len(self.lsBidding)>2000: break  #----------------------------------------------------
             
         print '--', ErrIndex, 'error records.'
         self.log()
