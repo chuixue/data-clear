@@ -132,13 +132,20 @@ if __name__ == '__main__':
     con1 = MongoClient('10.101.1.119', 27017)
     db = con1['jianzhu']
     ls = {}
-    for item in db['personNew1'].find():
+    print db['personNew1'].find({"id" : 50360899}).count()
+    print db['personNew1'].find({"id" : -1}).count()
+    print db['personNew1'].find({"id" : -1}) == None
+    if db['personNew1'].find({"id" : -1}):
+        print 1
+    
+    exit()
+    for item in db['personNew'].find():
         if item['personId'] not in ls:
             ls[item['personId']] = item['company_name']
         else:
             print item['company_name'], ls[item['personId']]
     
-    for item in db['personNew'].find():
+    for item in db['personNew1'].find():
         if item['personId'] not in ls:
             print item['company_name'], item['personId'], item['id']
     print len(ls)
