@@ -41,6 +41,10 @@ def getPersonOriginal(cfg):
 def sortString(str):
     return ','.join(sorted(str.split(',')))
 
+def md5ToLine(md5):
+    c = md5.split(',')
+    return {'name':c[0], 'professional':c[1], 'level':c[2], 'code':c[3], 'validityDate':c[4]}
+
 class readPersonData(object):
     def __init__(self, cfg):
         self.cfg = cfg
@@ -52,9 +56,12 @@ class readPersonData(object):
                          }
     '''可根据需要设置数据过滤条件'''
     def readPersonDataFilter(self, tb):
-        cursor = self.db[tb].find({}).limit(150000)
+        cursor = self.db[tb].find({})#.limit(50000)
         return self.callback[tb](cursor)
-        
+
+'''''''''''''''''''''''''''''''''
+    ↓↓最烧脑过程↓↓
+'''''''''''''''''''''''''''     
 '''
     lsCpNms只保存引用，缓存用
 '''
@@ -84,7 +91,6 @@ def checkNewRecord(cfg, newPersonDic):
             if key not in lsCpNms: lsCpNms[key] = {}
             lsCpNms[key][p] = lsPsIds[p]
             lsNew[p] = 1
-            print 'no'
             
     '''可合并数据·无正规personId'''
     for p in newPersonDic:
@@ -146,14 +152,85 @@ def readPerson(cfg):
     '''合并数据'''
     personDic = CP.combinePersonNoIdByName(rp.RP.personDic)
     ''''''
-    checkNewRecord(cfg, personDic)
-    return 
+    data = checkNewRecord(cfg, personDic)
+    return data
 
-def updatePerson(cfg, personDic):
-    lg = LG.Log()
-    lg.log('origin records count ', len(lsOrig))
+'''插入数据准备'''
+def formatInsert(lp, p, lsCompany):
+    cpname = lp['data']['company_name']
+    lp['data']['id'] = lp['id']   
+    lp['data']['personId'] = p
+    lp['data']['certificate'] = [md5ToLine(c) for c in lp['certificate']]
+    lp['data']['label'] = 0
+    lp['data']['other'] = ""
+    lp['data']['updateTime'] = datetime.datetime.now()
+    lp['data']['companyname'] = cpname
+    lp['data']['company_id'] = lsCompany[cpname] if cpname in lsCompany else 0
     
-    pass
+ 
+'''更新数据准备'''
+def formatUpdate(lp):
+    rst = {'updateTime': datetime.datetime.now(), 'label':0}
+    rst['certificate'] = [md5ToLine(c) for c in lp['certificate']]
+    lp['temp'] = [{'id':lp['id']}, {'$set':rst}]
+            
+def updatePerson(cfg, dataset):
+    lsCompany = P.getCompanyId(cfg.companyInfo)
+    lg = LG.Log()
+    lsPsIds = dataset[0]  
+    lsOther = dataset[1]  
+    lsNew = dataset[2]
+    lsInsert = []
+    lsUpdate = []
+    
+    for dts in [lsPsIds, lsOther]:
+        for p in dts:
+            if p not in lsNew: continue
+            if 'data' in dts[p]:
+                formatInsert(dts[p], p, lsCompany)
+                lsInsert.append(dts[p]['data'])
+            else:
+                formatUpdate(dts[p])
+                lsUpdate.append(dts[p]['temp'])
+        '''End For p'''
+    '''End For dts'''
+#    for s in lsInsert:
+#        print s
+        
+    lg.log('update table ', len(lsUpdate), ' ...')
+    for d in lsUpdate: cfg.writePerson.update(d[0], d[1])
+    lg.log('insert into table', len(lsInsert), ' ...')
+    if len(lsInsert)>0: cfg.writePerson.insert(lsInsert)
+    lg.log('complete!')
+    lg.save()
+    
+#    cfg.writePerson.insert
+#            if id not in lsData:
+#                lsData[id] = 1
+#            else:
+#                print 'error' 
+#        print lsPsIds[p]['id'], 'data' in lsPsIds[p]  
+        
+#    for p in lsOther:
+#        if p not in lsNew: continue
+#        if 'data' in lsOther[p]:
+#            formatInsert(lsOther[p], p)
+#            lsInsert.append(lsOther[p]['data'])
+#        else:
+#            formatUpdate(lsOther[p])
+#            lsInsert.append(lsOther[p]['data']['temp'])
+#        
+##        if id not in lsData:
+##            lsData[id] = 1
+##        else:
+##            print 'error'
+##        if lsOther[p]['id'] not in lsData:
+##            lsData[lsOther[p]['id']] = 1
+##        else:
+##            print 'o in'
+##        print lsOther[p]['id'], 'data' in lsOther[p]
+#    #lg.log('origin records count ', len(lsOrig))
+#    pass
 
 
 
@@ -222,7 +299,8 @@ if __name__ == '__main__':
     _cfg = CFG.Config()
     
 
-    readPerson(_cfg)    
+    updatePerson(_cfg, readPerson(_cfg))
+        
 #    checkNewRecord(_cfg)
 
     

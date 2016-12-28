@@ -70,15 +70,15 @@ def getMd5(src):
 
 if __name__ == '__main__':
     print datetime.datetime.now()
-    ls = {}
-    lp = {}
-    for i in range(0, 10):
-        _tp = {'id':i, 'dt':i+2}
-        ls[i] = _tp
-        lp[i] = ls[i] 
-    ls[1]['dt'] = 12306
-    print ls
-    print lp
+#    ls = {}
+#    lp = {}
+#    for i in range(0, 10):
+#        _tp = {'id':i, 'dt':i+2}
+#        ls[i] = _tp
+#        lp[i] = ls[i] 
+#    ls[1]['dt'] = 12306
+#    print ls
+#    print lp
     
 #    #1 - 10
 #    s = ['s', 't', 'l']
@@ -128,17 +128,21 @@ if __name__ == '__main__':
 #    src = '622623198807100039'[::-1]; getMd5(src)
     
     
-    
-    
-    exit()    
+#    exit()    
     con1 = MongoClient('10.101.1.119', 27017)
     db = con1['jianzhu']
     ls = {}
-#    for item in db['personNew'].find():
-#        if item['personId'] not in ls:
-#            ls[item['personId']] = item['company_name']
-#        else:
-#            print item['company_name'], ls[item['personId']]
+    for item in db['personNew1'].find():
+        if item['personId'] not in ls:
+            ls[item['personId']] = item['company_name']
+        else:
+            print item['company_name'], ls[item['personId']]
+    
+    for item in db['personNew'].find():
+        if item['personId'] not in ls:
+            print item['company_name'], item['personId'], item['id']
+    print len(ls)
+    exit()
     
     for item in db['WCSafetyEngineer'].find():
 #        if not P.checkIdCard(item['idCard']): 
