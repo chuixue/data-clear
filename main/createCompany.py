@@ -54,9 +54,10 @@ def getCompanyOriginal(cfg):
 def getQualification(qua):
     return dict((','.join([q['type'], q['class'], q['professional'], q['level'], q['code'], q['validityDates']]), q) for q in qua)
 
-def writeCompanyOut(cfg, lsComp):
+def writeCompanyOut(cfg, lsComp, dealStyle = 0):
     lg = LG.Log()
     lg.log('select the max id.')
+    writer = cfg.writeCompany if dealStyle==0 else cfg.updateCompany 
     index = P.getMaxId(cfg.companyInfo, 'id') + 1
     lsOrig = getCompanyOriginal(cfg) 
     lsInsert = []
@@ -72,12 +73,13 @@ def writeCompanyOut(cfg, lsComp):
         lsComp[comp]['company_qualification'] = ','.join([v['professional']+v['level'] for v in lsComp[comp]['qualification'].values()])
         lsComp[comp]['qualification'] = lsComp[comp]['qualification'].values()
         lsComp[comp]['id'] = index
+        lsComp[comp]['label'] = 0
         index += 1
         lsInsert.append(lsComp[comp])
     lg.log( 'write into table', len(lsInsert), '...')
-    if len(lsInsert)>0: cfg.writeCompany.insert(lsInsert)
+    if len(lsInsert)>0: writer.insert(lsInsert)
     lg.log( 'update some repeat company', len(lsUpdate), '...')
-    for d in lsUpdate: cfg.writeCompany.update(d[0], d[1])
+    for d in lsUpdate: writer.update(d[0], d[1])
     lg.log( 'complete!')
     lg.save()
 

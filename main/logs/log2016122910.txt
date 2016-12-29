@@ -1,0 +1,4 @@
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 10:08:05"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 10:10:59"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 10:18:50"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 10:18:52"}

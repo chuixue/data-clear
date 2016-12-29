@@ -70,6 +70,38 @@ def getMd5(src):
 
 if __name__ == '__main__':
     print datetime.datetime.now()
+#    ls = [['c'], ['d'], ['e'], ['f']]
+#    ls2 = [['r'], ['s'], ['t'], ['f']]
+#    #ls.extend(ls2)
+#    lp = {}
+#    index = 0
+#    for l in ls:
+#        lp[index] = l
+#        index += 1
+#        
+#    
+#    ls2.extend(lp.values())
+#    lp[0][0] = 'a'
+#    ls2[5][0] = 'z'
+#    print lp
+#    print ls
+#    print ls2
+#    
+#    exit()
+#    lp1 = ['abc', '你好吗', '不好呀', 'cgd', 'OK吗', '海森']
+#    lp2 = ['abc', '你好吗', '不好呀', 'cgd', 'OK吗', '海森']
+#    lp0 = ['OK吗', '海森', '不好呀', 'abc', '你好吗', 'cgd']
+#    lp3 = ['海森', 'abc', '你好吗', 'OK吗', 'cgd', '不好呀']
+#    for l in lp1: print l, 
+#    print
+#    
+#    for l in lp2: print l, 
+#    print
+    
+#    for l in lp3: print l, 
+#    print
+#    
+#    exit()
 #    ls = {}
 #    lp = {}
 #    for i in range(0, 10):
@@ -90,7 +122,22 @@ if __name__ == '__main__':
 #    for i in range(0, 100):
 #        print s[int(random.random() * len(s))],
 #    con1 = MongoClient('101.204.243.241', 27017)
-
+    con1 = MongoClient('10.101.1.119', 27017)
+    db1 = con1['jianzhu'] 
+    ls = {}
+    for item in db1['biddingC'].find({'company_name':'四川佳和建设工程有限公司'}):
+        if item['projectName'] not in ls:
+            ls[item['projectName']] = 1
+#        else:
+#            print item['projectName']
+            
+    for item in db1['bidding'].find({'company_name':'四川佳和建设工程有限公司'}):
+        if item['projectName'] not in ls:
+            
+            print item['projectName']
+    
+            
+    exit()
 #    ls = [ttt]
 #    ls[0]()
 #    tp1 = ['511026195601286014', '511026195603020615', '511026195603064415', '511026195401163714']

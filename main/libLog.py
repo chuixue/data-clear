@@ -30,7 +30,7 @@ class Log(object):
         
     def add(self, msg, p1 = "", p2 = "", p3 = "", p4 = ""):
         content = {}
-        _content = msg if type(msg)==type({}) or type(msg)==type([]) else msg.encode('utf8')  
+        _content = msg if type(msg)==type({}) or type(msg)==type([]) else str(msg).encode('utf8')  
         if type(_content)==type("") or type(_content)==type("中文") or type(_content)==type(1):
             _content = str(_content) + ''.join([p if p=="" else ", "+ p for p in [str(p1), str(p2), str(p3), str(p4)]])
             content = {'content': str(_content)}
@@ -63,7 +63,7 @@ class Log(object):
     def __del__(self):
         if len(self.data)>0: 
             self.error()
-        
+        self.writer.close()
         
         
         

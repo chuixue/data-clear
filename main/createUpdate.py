@@ -92,7 +92,7 @@ def updateCourt(cfg, lsCourt):
     lsUpdate = []
     lsCpId = P.getCompanyId(cfg.companyInfo)
     for cp in lsCourt:
-        st = {'courtRecords':lsCourt[cp].values(), 'updateTime':datetime.datetime.now()}
+        st = {'courtRecords':lsCourt[cp].values(), 'updateTime':datetime.datetime.now(), 'label':0}
         if cp in lsCpId: lsUpdate.append([{'id':lsCpId[cp]}, {'$set':st}])
     index = 0
     print 'update', len(lsUpdate), 'records...'
@@ -128,6 +128,7 @@ def updateHonors(cfg):
         if cpname in lsoperation: obj['operationDetail'] = lsoperation[cpname]
         if len(obj)==0: continue
         obj['updateTime'] = datetime.datetime.now()
+        obj['label'] = 0
         lsUpdate.append([{'id':item['id']}, {'$set':obj}])
         
     print 'update', len(lsUpdate), 'records...'
@@ -158,6 +159,7 @@ def updateGoodRecord(cfg):
         if cpname in lsGood: st['goodbehaviors'] = lsGood[cpname]
         if len(st)==0: continue
         st['updateTime'] = datetime.datetime.now()
+        st['label'] = 0
         lsUpdate.append([{'id':item['id']}, {'$set':st}])
     for d in lsUpdate:
         index += 1
@@ -208,6 +210,7 @@ def updateCompanyBase(cfg):
             print 'organizationCode：', line['organizationCode'], ', legalRepresentative:', line['legalRepresentative']  
         st = dict(('companyBases.'+k, line[k]) for k in line) 
         st['updateTime'] = datetime.datetime.now()
+        st['label'] = 0
         lsUpdate.append([{'id':item['id']}, {'$set':st}])
     print 'update all the companyInfoNew...'
     

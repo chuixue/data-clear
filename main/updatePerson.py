@@ -23,7 +23,7 @@ def getPersonOriginal(cfg):
     lsPsIds = {}    #正规personId
     lsOther = {}    #其它personId
     lsCpNms = {}    #company_name + name索引
-    for item in cfg.midPerson.find():
+    for item in cfg.updatePerson.find():
         cp = item['company_name'].encode('utf8')
         pId = item['personId']
         key = (cp + '_'+ item['name']).encode('utf8')
@@ -68,13 +68,13 @@ class readPersonData(object):
 def checkNewRecord(cfg, newPersonDic):
     lg = LG.Log()
     lg.log('select the max id.')
-    index = P.getMaxId(cfg.writePerson, 'id') + 1
+    index = P.getMaxId(cfg.updatePerson, 'id') + 1
     if index==0: index = 50000001
     lsPsIds, lsOther, lsCpNms = getPersonOriginal(cfg)
     lsNew = {}
     '''有personId数据'''
     print len(newPersonDic)
-    print len(lsPsIds), len(lsOther), len(lsCpNms)
+    print 'original records count', len(lsPsIds), len(lsOther), len(lsCpNms)
     for p in newPersonDic:
         if not LP.isPersonId(p): continue
         cp = newPersonDic[p]['company_name'].strip()
@@ -136,24 +136,20 @@ def checkNewRecord(cfg, newPersonDic):
     return [lsPsIds, lsOther, lsNew] 
         
 def readPerson(cfg): 
-#    cpname = c['company_name'] + c['name'].encode('utf8')
-#    line = [c['name'], c['professional'], c['level'], c['code'], c['validityDate']]
-#    lmd5 = ','.join(line)    
-#    {'name':c[0], 'professional':c[1], 'level':c[2], 'code':c[3], 'validityDate':c[4]}
-    
     lg = LG.Log()
     rp = readPersonData(cfg)
     tables = ['personnelInPCopy', 'personnelEnterPCopy', 'WCSafetyEngineer', 'safetyEngineer', 'CERegistered', 'WCEngineer']
-#    tables = ['WCSafetyEngineer', 'safetyEngineer', 'CERegistered', 'WCEngineer']
     for tb in tables:
         '''依次处理各表'''
         lg.log( 'read and deal table：', tb)
         rp.readPersonDataFilter(tb)
+        
     '''合并数据'''
     personDic = CP.combinePersonNoIdByName(rp.RP.personDic)
     ''''''
     data = checkNewRecord(cfg, personDic)
     return data
+
 
 '''插入数据准备'''
 def formatInsert(lp, p, lsCompany):
@@ -166,8 +162,7 @@ def formatInsert(lp, p, lsCompany):
     lp['data']['updateTime'] = datetime.datetime.now()
     lp['data']['companyname'] = cpname
     lp['data']['company_id'] = lsCompany[cpname] if cpname in lsCompany else 0
-    
- 
+     
 '''更新数据准备'''
 def formatUpdate(lp):
     rst = {'updateTime': datetime.datetime.now(), 'label':0}
@@ -194,104 +189,15 @@ def updatePerson(cfg, dataset):
                 lsUpdate.append(dts[p]['temp'])
         '''End For p'''
     '''End For dts'''
-#    for s in lsInsert:
-#        print s
         
     lg.log('update table ', len(lsUpdate), ' ...')
-    for d in lsUpdate: cfg.writePerson.update(d[0], d[1])
+    for d in lsUpdate: cfg.updatePerson.update(d[0], d[1])
     lg.log('insert into table', len(lsInsert), ' ...')
-    if len(lsInsert)>0: cfg.writePerson.insert(lsInsert)
+    if len(lsInsert)>0: cfg.updatePerson.insert(lsInsert)
     lg.log('complete!')
     lg.save()
     
-#    cfg.writePerson.insert
-#            if id not in lsData:
-#                lsData[id] = 1
-#            else:
-#                print 'error' 
-#        print lsPsIds[p]['id'], 'data' in lsPsIds[p]  
         
-#    for p in lsOther:
-#        if p not in lsNew: continue
-#        if 'data' in lsOther[p]:
-#            formatInsert(lsOther[p], p)
-#            lsInsert.append(lsOther[p]['data'])
-#        else:
-#            formatUpdate(lsOther[p])
-#            lsInsert.append(lsOther[p]['data']['temp'])
-#        
-##        if id not in lsData:
-##            lsData[id] = 1
-##        else:
-##            print 'error'
-##        if lsOther[p]['id'] not in lsData:
-##            lsData[lsOther[p]['id']] = 1
-##        else:
-##            print 'o in'
-##        print lsOther[p]['id'], 'data' in lsOther[p]
-#    #lg.log('origin records count ', len(lsOrig))
-#    pass
-
-
-
-#'''写入数据库'''
-#def writePerson(cfg, personDic):
-#    lsCompany = P.getCompanyId(cfg.companyInfo)
-#    index = 50000000
-#    for p in personDic:
-#        cps = personDic[p]['companyname'].keys()
-#        #cpname = '' if len(cps)==0 else cps[0].encode('utf8')
-#        cpname = personDic[p]['company_name']
-#        personDic[p]['companyname'] = cpname
-#        ls = personDic[p]['certificate'].values()
-#        personDic[p]['certificate'] = []
-#        for c in ls: 
-#            personDic[p]['certificate'].append({'name':c[0], 'professional':c[1], 'level':c[2], 'code':c[3], 'validityDate':c[4]})
-#        index += 1
-#        personDic[p]['company_id'] = lsCompany[cpname] if cpname in lsCompany else 0 
-#        personDic[p]['id'] = index
-#        personDic[p]['label'] = 0
-#        personDic[p]['other'] = ''
-#        personDic[p]['updateTime'] = datetime.datetime.now()
-#    print len(personDic)
-#    cfg.writePerson.insert(personDic.values())
-
-
-
-#def _updateCompanyIn(cfg, cursor):
-#    lg = LG.Log()
-#    lg.log('select the max id.')
-#    index = P.getMaxId(cfg.companyInfo, 'id') + 1
-#    if index==0: index = 10000001
-#    lsOrig = getCompanyOriginal(cfg)    
-#    lsComp = CC._readCompanyIn(cfg, cursor)
-#    lg.log('origin records count ', len(lsOrig))
-#    
-#    lsInsert = []
-#    lsUpdate = []
-#    for comp in lsComp:
-#        cpql = ','.join([v['professional']+v['level'] for v in lsComp[comp]['qualification'].values()])         
-#        lsComp[comp]['companyBases']['enterpriseType'] = lsComp[comp]['companyBases']['enterpriseType'].keys()
-#        lsComp[comp]['company_qualification'] = cpql
-#        lsComp[comp]['qualification'] = lsComp[comp]['qualification'].values()
-#        lsComp[comp]['updateTime'] = datetime.datetime.now() 
-#        if comp in lsOrig or comp.encode('utf8') in lsOrig:
-#            if sortString(lsOrig[comp][0])==sortString(cpql):
-#                continue
-#            else:
-#                lsUpdate.append([{'id':lsOrig[comp][1]}, {'$set':lsComp[comp]}])
-#        else:
-#            lg.log('new company: ' + comp, False)
-#            lsComp[comp]['id'] = index
-#            index += 1
-#            lsInsert.append(lsComp[comp])
-#    lg.log('update table ', len(lsUpdate), ' ...')
-#    for d in lsUpdate: cfg.writeCompany.update(d[0], d[1])
-#    lg.log('insert into table', len(lsInsert), ' ...')
-#    if len(lsInsert)>0: cfg.writeCompany.insert(lsInsert)
-#    lg.log('complete!')
-#    lg.save()
-    
     
 if __name__ == '__main__':
     dt = datetime.datetime.now()

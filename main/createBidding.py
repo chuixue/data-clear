@@ -43,13 +43,13 @@ class ReadBidding(object):
     def log(self): print '--', len(self.lsBidding), 'Records collect.'
     
     def read_gst_bidResult(self):
-        return self._read_gst_bidResult(self.cfg.dbBidding.gst_bidResult.find())
+        return self._read_gst_bidResult(self.cfg.dbBidding['gst_bidResult'].find())
     def read_gs_bidCandidate(self):
-        return self._read_gs_bidCandidate(self.cfg.dbBidding.gs_bidCandidate.find())
+        return self._read_gs_bidCandidate(self.cfg.dbBidding['gs_bidCandidate'].find())
     def read_gs_invitationBid(self):
-        return self._read_gs_invitationBid(self.cfg.dbBidding.gs_invitationBid.find({}, {'detailHtml':0}))
+        return self._read_gs_invitationBid(self.cfg.dbBidding['gs_invitationBid'].find({}, {'detailHtml':0}))
     def read_gst_project(self):
-        return self._read_gst_project(self.cfg.dbBidding.gst_project.find())
+        return self._read_gst_project(self.cfg.dbBidding['gst_project'].find())
     
     
     def _read_gs_invitationBid(self, cursor):
@@ -182,8 +182,9 @@ def remove_repeat(lines):
         if checkRepeat(line, lsTemp4, lsTemp3): continue
         if '中标'==''.join([line['type'], line['projectName'], line['architects'], line['biddingPrice']]).strip(): continue
         lsData.append(line)
-    print len(lsData) 
+    print 'return records count', len(lsData) 
     return lsData
+
 
 def checkRepeat(line, lsTemp4, lsTemp3):
     R = False
@@ -211,18 +212,28 @@ def checkRepeat(line, lsTemp4, lsTemp3):
 def readBidding(cfg): 
     rb = ReadBidding(cfg)
     
-    print 'read and deal table：gs_invitationBid'
-    rb.read_gs_invitationBid()
+    callbacks = {'gs_invitationBid':rb.read_gs_invitationBid, 'gs_bidCandidate':rb.read_gs_bidCandidate,
+                         'gst_bidResult':rb.read_gst_bidResult, 'gst_project':rb.read_gst_project,
+                         }
+    for tb in callbacks:
+        print 'read and deal table：', tb
+        '''依次处理各源表'''
+        
+        callbacks[tb]()
+        
+#    print 'read and deal table：gs_invitationBid'
+#    rb.read_gs_invitationBid()
+#    
+#    print 'read and deal table：gs_bidCandidate'
+#    rb.read_gs_bidCandidate()
+#    
+#    print 'read and deal table：gst_bidResult'
+#    rb.read_gst_bidResult()
+#    
+#    print 'read and deal table：gst_project'
+#    rb.read_gst_project()
     
-    print 'read and deal table：gs_bidCandidate'
-    rb.read_gs_bidCandidate()
-    
-    print 'read and deal table：gst_bidResult'
-    rb.read_gst_bidResult()
-    
-    print 'read and deal table：gst_project'
-    rb.read_gst_project()
-    
+    print 'remove repeat records...'
     remove_repeat(rb.lsBidding)
         
     return rb.lsBidding
@@ -297,7 +308,6 @@ def addBiddingFromcompanyAchievement(cfg):
             '''--------------二次去重------------'''
             if checkRepeat(line, lsTemp4, lsTemp3): continue
             if '中标'==''.join([line['type'], line['projectName'], line['architects'], line['biddingPrice']]).strip():
-                print 'delete'
                 continue
             
             '''-----------------------------------'''

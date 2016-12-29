@@ -1,0 +1,7 @@
+{"content": "select the max id.", "updateTime": "2016-12-29 15:09:07"}
+{"content": "7378, remove repeat records left count, 0", "updateTime": "2016-12-29 15:09:58"}
+{"content": "7378, remove repeat records left count, 0", "updateTime": "2016-12-29 15:10:29"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 15:08:37"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 15:08:44"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 15:09:05"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 15:09:06"}

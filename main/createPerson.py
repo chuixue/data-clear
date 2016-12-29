@@ -255,8 +255,6 @@ def readPerson(cfg):
     for tb in callbacks:
         print 'read and deal table：', tb
         
-#        if tb=='personnelInPCopy': continue
-        
         '''依次处理各源表'''
         
         callbacks[tb]()

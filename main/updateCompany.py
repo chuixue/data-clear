@@ -18,7 +18,7 @@ sys.setdefaultencoding('utf-8')
 
 
 def getCompanyOriginal(cfg):
-    return dict((item['company_name'], [item['company_qualification'], item['id']]) for item in cfg.midCompany.find())
+    return dict((item['company_name'], [item['company_qualification'], item['id']]) for item in cfg.updateCompany.find())
     
 def sortString(str):
     return ','.join(sorted(str.split(',')))
@@ -42,7 +42,7 @@ def updateCompanyIn(cfg):
 def _updateCompanyIn(cfg, cursor):
     lg = LG.Log()
     lg.log('select the max id.')
-    index = P.getMaxId(cfg.companyInfo, 'id') + 1
+    index = P.getMaxId(cfg.updateCompany, 'id') + 1
     if index==0: index = 10000001
     lsOrig = getCompanyOriginal(cfg)    
     lsComp = CC._readCompanyIn(cfg, cursor)
@@ -55,7 +55,9 @@ def _updateCompanyIn(cfg, cursor):
         lsComp[comp]['companyBases']['enterpriseType'] = lsComp[comp]['companyBases']['enterpriseType'].keys()
         lsComp[comp]['company_qualification'] = cpql
         lsComp[comp]['qualification'] = lsComp[comp]['qualification'].values()
-        lsComp[comp]['updateTime'] = datetime.datetime.now() 
+        lsComp[comp]['updateTime'] = datetime.datetime.now()
+        lsComp[comp]['label'] = 0
+        lsComp[comp]['other'] = ""
         if comp in lsOrig or comp.encode('utf8') in lsOrig:
             if sortString(lsOrig[comp][0])==sortString(cpql):
                 continue
@@ -67,9 +69,9 @@ def _updateCompanyIn(cfg, cursor):
             index += 1
             lsInsert.append(lsComp[comp])
     lg.log('update table ', len(lsUpdate), ' ...')
-    for d in lsUpdate: cfg.writeCompany.update(d[0], d[1])
+    for d in lsUpdate: cfg.updateCompany.update(d[0], d[1])
     lg.log('insert into table', len(lsInsert), ' ...')
-    if len(lsInsert)>0: cfg.writeCompany.insert(lsInsert)
+    if len(lsInsert)>0: cfg.updateCompany.insert(lsInsert)
     lg.log('complete!')
     lg.save()
     

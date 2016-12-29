@@ -1,0 +1,46 @@
+{"content": "select the max id.", "updateTime": "2016-12-29 14:22:41"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:13:01"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:15:37"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:22:27"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:22:29"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:24:22"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:23:16"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:23:31"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:24:19"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:24:20"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:26:56"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:26:26"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:26:32"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:26:55"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:26:55"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:27:57"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:27:24"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:27:30"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:27:54"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:27:55"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:29:42"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:29:12"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:29:18"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:29:40"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:29:41"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:34:32"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:34:01"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:34:08"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:34:30"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:34:31"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:36:41"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:36:11"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:36:18"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:36:40"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:36:41"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:43:17"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:42:46"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:42:53"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:43:15"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:43:16"}
+{"content": "select the max id.", "updateTime": "2016-12-29 14:45:25"}
+{"content": "8232, remove repeat records left count, 0", "updateTime": "2016-12-29 14:46:17"}
+{"content": "read and deal table\uff1a, gs_invitationBid", "updateTime": "2016-12-29 14:44:55"}
+{"content": "read and deal table\uff1a, gs_bidCandidate", "updateTime": "2016-12-29 14:45:01"}
+{"content": "read and deal table\uff1a, gst_bidResult", "updateTime": "2016-12-29 14:45:24"}
+{"content": "read and deal table\uff1a, gst_project", "updateTime": "2016-12-29 14:45:24"}

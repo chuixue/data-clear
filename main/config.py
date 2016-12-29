@@ -26,6 +26,9 @@ class Config(object):
         self.writeCompany = db1.companyInfoNew
         self.writePerson = db1.personNew
         self.writeBidding = db1.bidding
+        self.updateCompany = db1.companyInfoNew
+        self.updatePerson = db1.personNew
+        self.updateBidding = db1.bidding
         self.midCompany = db3.companyInfoNew
         self.midPerson = db3.personNew
         self.midBidding = db3.bidding
